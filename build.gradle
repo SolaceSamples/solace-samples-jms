@@ -1,0 +1,75 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+// Don't need these task, so disabling them. Makes it possible to avoid
+// declaring a single application main class.
+startScripts.enabled = false
+run.enabled = false
+
+// Also don't need the regular application distribution packages since
+// this is just a set of samples. So disabling to make the build output
+// cleaner
+distTar.enabled=false
+distZip.enabled=false
+
+applicationName = 'solace-samples-jms'
+version = ''
+
+jar {
+	baseName = 'solace-samples-jms'
+    version =  version
+    manifest {
+        attributes 'Implementation-Title': 'Solace Getting Started Samples',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+       dirs 'libs'
+    }
+}
+
+dependencies {
+    // Solace Messaging API for Java Dependencies
+    compile("commons-lang:commons-lang:2.6")
+    compile("commons-logging:commons-logging:1.2")
+    compile("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1")
+    compile("com.solacesystems:sol-common:+")
+    compile("com.solacesystems:sol-jcsmp:+")
+    compile("com.solacesystems:sol-jms:+")
+}
+
+task createAllStartScripts() << {
+     // just a placeholder
+}
+  def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
+				 'topicSubscriber':'com.solace.samples.TopicSubscriber',
+				 'queueProducer':'com.solace.samples.QueueProducer',
+				 'queueConsumer':'com.solace.samples.QueueConsumer',
+				 'basicRequestor':'com.solace.samples.BasicRequestor',
+				 'basicReplier':'com.solace.samples.BasicReplier'
+]
+  scripts.each() { scriptName, className ->
+          def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
+        mainClassName = className
+        applicationName = scriptName
+        outputDir = new File(project.buildDir, 'scripts')
+        classpath = jar.outputs.files + project.configurations.runtime
+    }
+      applicationDistribution.into("bin") {
+            from(t)
+            fileMode = 0755
+			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+    createAllStartScripts.dependsOn(t)
+}
+
+installDist {
+    destinationDir = new File(project.buildDir, 'staged')
+}
+
+assemble.dependsOn installDist

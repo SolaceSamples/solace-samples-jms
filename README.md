@@ -1,17 +1,42 @@
-# Solace Samples Template
+# Getting Started Examples
+## Solace Messaging API for Java (JCSMP)
 
-This project is the common template from which all Solace Samples are merged. When creating a new Solace sample, you should fork this repo and then create your sample. Template updates can be applied by merging from this repo on both the `master` and `gh-pages` branch. The `gh-pages` branch is setup and ready to be used to create tutorials. See the [README](https://github.com/SolaceSamples/solace-samples-template/blob/gh-pages/README.md) in that branch for details. Any code and description in the samples should not overlap with this template.
+These tutorials will get you up to speed and sending messages with Solace technology as quickly as possible. There are two ways you can get started:
 
-## Instructions (to be deleted in a Solace Samples project)
+- If your company has Solace message routers deployed, contact your middleware team to obtain the host name or IP address of a Solace message router to test against, a username and password to access it, and a VPN in which you can produce and consume messages.
+- If you do not have access to a Solace message router, you will need to go through the “[Set up a VMR](http://dev.solacesystems.com/get-started/vmr-setup-tutorials/setting-up-solace-vmr/)” tutorial to download and install the software.
 
-Here are some instructions once you've forked the repository and are creating new Solace samples.
+## Contents
 
-1. Update the repository links in [](CONTRIBUTING.md)
-2. Add your Samples source code to the master branch
-3. Update this README with instructions on how to build and run.
-4. Create walk through tutorials on the gh-pages branch. Again see [README](https://github.com/SolaceSamples/solace-samples-template/blob/gh-pages/README.md) on that branch for details.
+This repository contains code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials landing page](https://solacesamples.github.io/solace-samples-java/).
 
-Below this are common sections that should appear in all Solace Samples README.md. Leave them! :)
+See the individual tutorials for details:
+
+- [Publish/Subscribe](https://solacesamples.github.io/solace-samples-java/docs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
+- [Persistence](https://solacesamples.github.io/solace-samples-java/docs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
+- [Request/Reply](https://solacesamples.github.io/solace-samples-java/docs/request-reply): Learn how to set up request/reply messaging.
+- [Confirmed Delivery](https://solacesamples.github.io/solace-samples-java/docs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
+- [Topic to Queue Mapping](https://solacesamples.github.io/solace-samples-java/docs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
+
+## Checking out and Building
+
+To build these samples, download and unpacked the Java API library to a known location. The Java API library can be [downloaded here](http://dev.solacesystems.com/downloads/). Then copy the contents of the `sol-jcsmp-VERSION/lib` directory to a `libs` sub-directory in your `solace-samples-java` project.
+
+In the following command line replace `VERSION` with the Solace API version you downloaded. For example:
+
+  1. clone this GitHub repository
+  1. `cd solace-samples-java`
+  1. `mkdir libs`
+  1. `cp  ../sol-jcsmp-VERSION/lib/* libs`
+  1. `./gradlew assemble`
+
+## Running the Samples
+
+To try individual samples, build the project from source and then run samples like the following:
+
+    ./build/staged/bin/topicPublisher <msg_backbone_ip:port>
+
+The individual tutorials linked above provide full details which can walk you through the samples, what they do, and how to correctly run them to explore Solace messaging.
 
 ## Using Eclipse
 
