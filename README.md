@@ -1,5 +1,5 @@
 # Getting Started Examples
-## Solace Messaging API for Java (JCSMP)
+## Solace JMS API
 
 These tutorials will get you up to speed and sending messages with Solace technology as quickly as possible. There are two ways you can get started:
 
@@ -8,26 +8,26 @@ These tutorials will get you up to speed and sending messages with Solace techno
 
 ## Contents
 
-This repository contains code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials landing page](https://solacesamples.github.io/solace-samples-java/).
+This repository contains code and matching tutorial walk throughs for basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [Getting Started Home Page](https://solacesamples.github.io/solace-samples-jms/).
 
 See the individual tutorials for details:
 
-- [Publish/Subscribe](https://solacesamples.github.io/solace-samples-java/docs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
-- [Persistence](https://solacesamples.github.io/solace-samples-java/docs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
-- [Request/Reply](https://solacesamples.github.io/solace-samples-java/docs/request-reply): Learn how to set up request/reply messaging.
-- [Confirmed Delivery](https://solacesamples.github.io/solace-samples-java/docs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
-- [Topic to Queue Mapping](https://solacesamples.github.io/solace-samples-java/docs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
+- [Publish/Subscribe](https://solacesamples.github.io/solace-samples-jms/docs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
+- [Persistence](https://solacesamples.github.io/solace-samples-jms/docs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
+- [Request/Reply](https://solacesamples.github.io/solace-samples-jms/docs/request-reply): Learn how to set up request/reply messaging.
+- [Confirmed Delivery](https://solacesamples.github.io/solace-samples-jms/docs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
+- [Topic to Queue Mapping](https://solacesamples.github.io/solace-samples-jms/docs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
 
 ## Checking out and Building
 
-To build these samples, download and unpacked the Java API library to a known location. The Java API library can be [downloaded here](http://dev.solacesystems.com/downloads/). Then copy the contents of the `sol-jcsmp-VERSION/lib` directory to a `libs` sub-directory in your `solace-samples-java` project.
+To build these samples, download and unpacked the JMS API library to a known location. The JMS API library can be [downloaded here](http://dev.solacesystems.com/downloads/). Then copy the contents of the `sol-jms-VERSION/lib` directory to a `libs` sub-directory in your `solace-samples-jms` project.
 
 In the following command line replace `VERSION` with the Solace API version you downloaded. For example:
 
   1. clone this GitHub repository
-  1. `cd solace-samples-java`
+  1. `cd solace-samples-jms`
   1. `mkdir libs`
-  1. `cp  ../sol-jcsmp-VERSION/lib/* libs`
+  1. `cp  ../sol-jms-VERSION/lib/* libs`
   1. `./gradlew assemble`
 
 ## Running the Samples
@@ -48,7 +48,7 @@ Once complete, you may then import the projects into Eclipse as usual:
 
  *File -> Import -> Existing projects into workspace*
 
-Browse to the *'solace-samples-java'* root directory. All projects should import
+Browse to the *'solace-samples-jms'* root directory. All projects should import
 free of errors.
 
 ## Using IntelliJ IDEA
@@ -63,7 +63,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/SolaceSamples/solace-samples-java/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceSamples/solace-samples-jms/contributors) who participated in this project.
 
 ## License
 
@@ -73,8 +73,7 @@ This project is licensed under the Apache License, Version 2.0. - See the [LICEN
 
 For more information try these resources:
 
-- The Solace Developer Portal website at:
-[http://dev.solacesystems.com](http://dev.solacesystems.com/)
+- The Solace Developer Portal website at: http://dev.solacesystems.com/
 - Get a better understanding of [Solace technology.](http://dev.solacesystems.com/tech/)
 - Check out the [Solace blog](http://dev.solacesystems.com/blog/) for other interesting discussions around Solace technology
 - Ask the [Solace community.](http://dev.solacesystems.com/community/)
