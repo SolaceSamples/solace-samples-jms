@@ -1,13 +1,14 @@
 # Site settings
-title: Solace Samples Template
-baseurl: "/solace-samples-template" # the subpath of your site, e.g. /solace-samples-java
-repository: https://github.com/SolaceSamples/solace-samples-template
+title: Solace JMS API
+baseurl: "/solace-samples-jms" # the subpath of your site, e.g. /solace-samples-java
+repository: https://github.com/SolaceSamples/solace-samples-jms
 
 # Also see _includes/intro.html to customize the description which gets included in index.html.
 
 
 #----------------------------------------------------
 # Generally don't modify items below this point
+
 url: "solacesamples.github.io" # the base hostname & protocol for your site
 
 # Google services
