@@ -15,7 +15,7 @@ docs-vmr-setup: http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm
 docs-core-concepts: http://docs.solace.com/Features/Core-Concepts.htm
 docs-jms-home: http://docs.solace.com/Solace-JMS-API/JMS-home-open.htm
 docs-jms-connections: http://docs.solace.com/Solace-JMS-API/Establishing-Connections.htm
-docs-gm-rr: http://docs.solace.com/Solace-JMS-API/Using-Topic-Requestors.htm#publishing_messages_3850262966_298778
+docs-gm-rr: http://docs.solace.com/Solace-JMS-API/Using-Topic-Requestors.htm
 docs-topic-mapping: http://docs.solace.com/Features/Core-Concepts.htm#topic-queue-mapping
 docs-semp: http://docs.solace.com/SEMP/Using-SEMP-to-Manage-and-Monitor-Routers.htm
 
