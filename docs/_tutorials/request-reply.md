@@ -14,12 +14,12 @@ This tutorial outlines both roles in the request-response message exchange patte
 
 This tutorial assumes the following:
 
-*   You are familiar with Solace [core concepts](http://dev.solacesystems.com/docs/core-concepts/){:target="_top"}.
+*   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
 *   You have access to a running Solace message router with the following configuration:
     *   Enabled message VPN
     *   Enabled client username
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
 The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
 
@@ -49,7 +49,7 @@ The oracle link points you to the JavaEE official tutorials which provide a good
 
 Request-reply messaging is supported by the Solace message router for all delivery modes. The JMS API does provide a `TopicRequestor` and `QueueRequestor` interface which is very simple. However, this interface lacks the ability to timeout the requests. This limitation means that it is often simpler to implement the request – reply pattern in your application. This tutorial will follow this approach.
 
-It is also possible to use guaranteed messaging for request reply scenarios. In this case the replier can listen on a queue for incoming requests and the requestor can use a temporary endpoint to attract replies. This is explained further in the [Solace product documentation](https://sftp.solacesystems.com/Portal_Docs/){:target="_top"} and shown in the API samples named `SolJMSRRGuaranteedRequestor` and `SolJMSRRGuaranteedReplier`.
+It is also possible to use guaranteed messaging for request reply scenarios. In this case the replier can listen on a queue for incoming requests and the requestor can use a temporary endpoint to attract replies. This is explained further in the [Solace product documentation]({{ site.docs-gm-rr }}){:target="_top"} and shown in the API samples named `SolJMSRRGuaranteedRequestor` and `SolJMSRRGuaranteedReplier`.
 
 ### Message Correlation
 
@@ -61,9 +61,9 @@ Note: In JMS it also common for the requestor to put a unique message ID into th
 
 ## Trying it yourself
 
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples](http://dev.solacesystems.com/get-started/jms-tutorials/){:target="_top"}.
+This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
 
-To successfully build the samples you must have the JMS API downloaded and available. The JMS API library can be [downloaded here](http://dev.solacesystems.com/downloads/){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
+To successfully build the samples you must have the JMS API downloaded and available. The JMS API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
@@ -108,9 +108,9 @@ jndi message-vpn "default"
     exit
 ```
 
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
+To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
 
-Users can learn more details on Solace JMS and JNDI by referring to the [SolAdmin User Guide – Configuring JMS Objects](https://sftp.solacesystems.com/Portal_Docs/#page/SolAdmin_User_Guide/Configuring_JMS_Objects.html#){:target="_top"}.
+Users can learn more details on Solace JMS and JNDI by referring to the [SolAdmin User Guide – Configuring JMS Objects]({{ site.docs-jms-home }}){:target="_top"}.
 
 ## Connecting a session to the message router
 
@@ -282,4 +282,4 @@ $ ./build/staged/bin/basicRequestor <HOST>
 
 With that you now know how to successfully implement the request-reply message exchange pattern using JMS NON-PERSISTENT messages and temporary endpoints.
 
-If you have any issues sending and receiving a message, check the [Solace community](http://dev.solacesystems.com/community/){:target="_top"} for answers to common issues.
+If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.

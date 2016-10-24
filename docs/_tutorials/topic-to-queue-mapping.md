@@ -9,7 +9,7 @@ This tutorial builds on the basic concepts introduced in [Persistence with Queue
 
 ![]({{ site.baseurl }}/images/topic-to-queue-mapping.png)
 
-In addition to spooling messages published directly to the queue, it is possible to add one or more topic subscriptions to a durable queue so that messages published to those topics are also delivered to and spooled by the queue. This is a powerful feature that enables queues to participate equally in point to point and publish / subscribe messaging models. More details about the [“Topic to Queue Mapping” feature here](http://dev.solacesystems.com/docs/core-concepts/#topic-queue-mapping){:target="_top"}.
+In addition to spooling messages published directly to the queue, it is possible to add one or more topic subscriptions to a durable queue so that messages published to those topics are also delivered to and spooled by the queue. This is a powerful feature that enables queues to participate equally in point to point and publish / subscribe messaging models. More details about the [“Topic to Queue Mapping” feature here]({{ site.docs-topic-mapping }}){:target="_top"}.
 
 The following diagram illustrates this feature.
 
@@ -21,15 +21,15 @@ If you have a durable queue named “Q”, it will receive messages published di
 
 JMS is a standard programmatic interface with a design goal of being messaging middleware agnostic. As such, the JMS interface does not provide a way for applications to directly take advantage of the Solace Topic to Queue Mapping feature. However JMS applications wishing to take advantage of this Solace feature have a few options.
 
-One option is to use a management interface to administratively configure the topic to queue mapping, by adding topic subscriptions to the queue. This can either be done through the CLI or SolAdmin management applications; or the SEMP programmatic management API. The SEMP API enables applications to fully configure Solace message routers. Applications can use this API by logging in to the Solace message router using a Message-VPN admin account. This concept is introduced in the [Technology – Messaging Platform Features](http://dev.solacesystems.com/tech/#other){:target="_top"} and further details are available in the [Solace Message Router Product Documentation](https://sftp.solacesystems.com/Portal_Docs/index.html#page/Message_Bus_and_Events_Management/About_This_Document.html#){:target="_top"}.
+One option is to use a management interface to administratively configure the topic to queue mapping, by adding topic subscriptions to the queue. This can either be done through the CLI or SolAdmin management applications; or the SEMP programmatic management API. The SEMP API enables applications to fully configure Solace message routers. Applications can use this API by logging in to the Solace message router using a Message-VPN admin account. This concept is introduced in the [Technology – Messaging Platform Features]({{ site.links-tech-other }}){:target="_top"} and further details are available in the [Solace Message Router Product Documentation]({{ site.docs-semp }}){:target="_top"}.
 
-A second option is to consider using a Solace Java API session directly for this part of your application. This is outlined in the [Java API version of this tutorial](http://dev.solacesystems.com/get-started/java-tutorials/topic-queue-mapping_java/){:target="_top"}. This would involve opening a second client connection using a Java API Session and then mapping the required topics onto the desired queue. Then this Java API session can be closed.
+A second option is to consider using a Solace Java API session directly for this part of your application. This is outlined in the [Java API version of this tutorial]({{ site.links-java-tutorial }}){:target="_top"}. This would involve opening a second client connection using a Java API Session and then mapping the required topics onto the desired queue. Then this Java API session can be closed.
 
 ## Summarizing
 
 So in summary JMS applications wishing to take advantage of this feature have two options:
 
-*   [Use one of the Solace management interfaces and directly configure the topic subscriptions on the queue](http://dev.solacesystems.com/docs/core-concepts/#topic-queue-mapping){:target="_top"}.
-*   [Use the Solace API for Java directly for this part of your application](http://dev.solacesystems.com/get-started/java-tutorials/topic-queue-mapping_java/){:target="_top"}.
+*   [Use one of the Solace management interfaces and directly configure the topic subscriptions on the queue]({{ site.docs-topic-mapping }}){:target="_top"}.
+*   [Use the Solace API for Java directly for this part of your application]({{ site.links-java-tutorial }}){:target="_top"}.
 
-If you have any issues or questions check the [Solace community](http://dev.solacesystems.com/community/){:target="_top"} for answers and discussions.
+If you have any issues or questions check the [Solace community]({{ site.links-community }}){:target="_top"} for answers and discussions.

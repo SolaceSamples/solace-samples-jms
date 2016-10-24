@@ -13,12 +13,12 @@ This tutorial will introduce you to the fundamentals of the JMS 1.1 API as imple
 
 This tutorial assumes the following:
 
-*   You are familiar with Solace [core concepts](http://dev.solacesystems.com/docs/core-concepts/){:target="_top"}.
+*   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
 *   You have access to a running Solace message router with the following configuration:
     *   Enabled message VPN
     *   Enabled client username
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
 The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
 
@@ -76,9 +76,9 @@ For the purposes of this tutorial, you will connect to the default message VPN o
 
 ## Trying it yourself
 
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples](http://dev.solacesystems.com/get-started/jms-tutorials/){:target="_top"}.
+This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
 
-To successfully build the samples you must have the JMS API downloaded and available. The JMS API library can be [downloaded here](http://dev.solacesystems.com/downloads/){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
+To successfully build the samples you must have the JMS API downloaded and available. The JMS API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
@@ -123,9 +123,9 @@ jndi message-vpn "default"
     exit
 ```
 
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
+To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
 
-Users can learn more details on Solace JMS and JNDI by referring to the [SolAdmin User Guide – Configuring JMS Objects](https://sftp.solacesystems.com/Portal_Docs/#page/SolAdmin_User_Guide/Configuring_JMS_Objects.html#){:target="_top"}.
+Users can learn more details on Solace JMS and JNDI by referring to the [Solace JMS Documentation]({{ site.docs-jms-home }}){:target="_top"}.
 
 ## Connecting to the Solace message router
 
@@ -145,7 +145,7 @@ Connection connection = cf.createConnection();
 final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 ```
 
-This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Messaging API Developer Guide – Establishing Connections](https://sftp.solacesystems.com/Portal_Docs/#page/Solace_JMS_Messaging_API_Developer_Guide/Establishing_Connections.html#).
+This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Messaging API Developer Guide – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 At this point your client is connected to the Solace message router. You can use SolAdmin to view the client connection and related details.
 
@@ -329,6 +329,6 @@ The received message is printed to the screen. The `TextMessage` contents was �
 
 You have now successfully connected a client, subscribed to a topic and exchanged messages using this topic.
 
-If you have any issues sending and receiving a message, check the [Solace community](http://dev.solacesystems.com/community/){:target="_top"} for answers to common issues.
+If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.
 
 

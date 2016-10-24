@@ -13,13 +13,13 @@ This tutorial builds on the basic concepts introduced in the [publish/subscribe 
 
 This tutorial assumes the following:
 
-*   You are familiar with Solace [core concepts](http://dev.solacesystems.com/docs/core-concepts/){:target="_top"}.
+*   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
 *   You have access to a running Solace message router with the following configuration:
     *   Enabled message VPN
     *   Enabled client username
     *   Client-profile enabled with guaranteed messaging permissions.
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
 The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
 
@@ -48,9 +48,9 @@ As with other tutorials, this tutorial will connect to the default message VPN o
 
 ## Trying it yourself
 
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples](http://dev.solacesystems.com/get-started/jms-tutorials/){:target="_top"}.
+This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
 
-To successfully build the samples you must have the Java API downloaded and available. The Java API library can be [downloaded here](http://dev.solacesystems.com/downloads/){:target="_top"}. The Java API is distributed as a zip file containing the required jars, API documentation, and examples.
+To successfully build the samples you must have the Java API downloaded and available. The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The Java API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
@@ -112,7 +112,7 @@ jndi message-vpn "default"
   exit
 ```
 
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started](http://dev.solacesystems.com/docs/get-started/setting-up-solace-vmr_vmware/){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
+To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
 
 The first time you run this script you will see an error running this command:
 
@@ -122,7 +122,7 @@ ERROR: Object '/JNDI/Q/tutorial' does not exist.
 Command Failed
 ```
 
-This error can safely be ignored. Future releases of the Solace message router will allow this script to be cleaned up further to avoid this error. Users can learn more details on Solace JMS and JNDI by referring to the [SolAdmin User Guide – Configuring JMS Objects](https://sftp.solacesystems.com/Portal_Docs/#page/SolAdmin_User_Guide/Configuring_JMS_Objects.html#){:target="_top"}.
+This error can safely be ignored. Future releases of the Solace message router will allow this script to be cleaned up further to avoid this error. Users can learn more details on Solace JMS and JNDI by referring to the [Solace JMS Documentaiton]({{ site.docs-jms-home }}){:target="_top"}.
 
 ## Connecting a session to the message router
 
@@ -157,7 +157,7 @@ Now it is time to receive the messages sent to your queue.
 
 ![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
 
-You still need to a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Messaging API Developer Guide – Establishing Connections](https://sftp.solacesystems.com/Portal_Docs/#page/Solace_JMS_Messaging_API_Developer_Guide/Establishing_Connections.html#){:target="_top"}.
+You still need to a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Messaging API Developer Guide – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 ```java
 Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
@@ -232,4 +232,4 @@ $ ./build/staged/bin/queueConsumer <HOST>
 
 You have now successfully connected a client, sent persistent messages to a queue and received them from a consumer flow.
 
-If you have any issues sending and receiving a message, check the [Solace community](http://dev.solacesystems.com/community/){:target="_top"} for answers to common issues.
+If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.
