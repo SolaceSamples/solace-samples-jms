@@ -76,15 +76,6 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-
-## Trying it yourself
-
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
-
-To successfully build the samples you must have the Java API downloaded and available. The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The Java API is distributed as a zip file containing the required jars, API documentation, and examples.
-
-At the end, this tutorial walks through downloading and running the sample from source.
-
 ## Configuring Solace JNDI
 
 In order for JMS clients to successfully connect to a message broker like a Solace message router, they need to look up a connection factory object using the Java Naming and Directory Interface (JNDI) service. Solace message routers provide a JNDI lookup service to make this integration easy.
