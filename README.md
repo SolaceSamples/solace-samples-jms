@@ -24,14 +24,9 @@ This tutorial requires the Solace JMS API library. Download the JMS API library 
 
 ## Build the Samples
 
-Copy the contents of the `sol-jms-VERSION/lib` directory from the Java API library to a `libs` sub-directory in your `solace-samples-jms` project.
-
-In the following command line replace `VERSION` with the Solace API version you downloaded. For example:
+Just clone and build. For example:
 
   1. clone this GitHub repository
-  1. `cd solace-samples-jms`
-  1. `mkdir libs`
-  1. `cp  ../sol-jms-VERSION/lib/* libs`
   1. `./gradlew assemble`
 
 ## Running the Samples

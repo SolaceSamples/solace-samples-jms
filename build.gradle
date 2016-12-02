@@ -28,25 +28,18 @@ jar {
 
 repositories {
     mavenCentral()
-    flatDir {
-       dirs 'libs'
-    }
 }
 
 dependencies {
     // Solace Messaging API for Java Dependencies
-    compile("commons-lang:commons-lang:2.6")
-    compile("commons-logging:commons-logging:1.2")
-    compile("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1")
-    compile("com.solacesystems:sol-common:+")
-    compile("com.solacesystems:sol-jcsmp:+")
-    compile("com.solacesystems:sol-jms:+")
+    compile("com.solacesystems:sol-jms:10.+")
 }
 
 task createAllStartScripts() << {
      // just a placeholder
 }
-  def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
+  
+def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
 				 'topicSubscriber':'com.solace.samples.TopicSubscriber',
 				 'queueProducer':'com.solace.samples.QueueProducer',
 				 'queueConsumer':'com.solace.samples.QueueConsumer',
