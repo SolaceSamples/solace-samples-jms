@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    // Solace Messaging API for Java Dependencies
+    // Solace Messaging API for JMS Dependencies
     compile("com.solacesystems:sol-jms:10.+")
 }
 
