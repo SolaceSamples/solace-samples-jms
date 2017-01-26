@@ -49,6 +49,7 @@ public class QueueConsumer {
         env.put(InitialContext.PROVIDER_URL, (String) args[0]);
         env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
         env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
+        env.put(Context.SECURITY_CREDENTIALS, "password");
 
         // InitialContext is used to lookup the JMS administered objects.
         InitialContext initialContext = new InitialContext(env);
