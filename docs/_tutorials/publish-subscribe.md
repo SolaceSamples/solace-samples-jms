@@ -159,6 +159,7 @@ env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDII
 env.put(InitialContext.PROVIDER_URL, (String)args[0]);
 env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
 env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
+env.put(Context.SECURITY_CREDENTIALS, "password");
 
 InitialContext initialContext = new InitialContext(env);
 ConnectionFactory cf = (ConnectionFactory)initialContext.lookup("/JNDI/CF/GettingStarted");
