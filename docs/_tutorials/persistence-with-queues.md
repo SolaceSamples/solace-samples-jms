@@ -76,79 +76,30 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Configuring Solace JNDI
 
-In order for JMS clients to successfully connect to a message broker like a Solace message router, they need to look up a connection factory object using the Java Naming and Directory Interface (JNDI) service. Solace message routers provide a JNDI lookup service to make this integration easy.
 
-Additionally, this tutorial will make use of one JNDI topic for publishing and subscribing to messages. For simplicity in this tutorial, the following CLI script is provided. It will do the following:
+## Solace message router JMS administered objects
 
-*   Properly configure the default message-VPN with the necessary JNDI configuration.
-*   Create the required durable Queue
+This tutorial will make use of two JMS administered objects:
+*   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
+*   A Queue Destination – Used for publishing and subscribing to messages. This example will use the queue `Q/tutorial`
 
-The script configures these required JNDI resources:
+As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) we will use the approach of programmatically creating the required objects.
 
-<table>
-    <tr>
-        <th>Resource</th>
-        <th>Value</th>
-    </tr>
-    <tr>
-        <td>Connection Factory</td>
-        <td>/JNDI/CF/GettingStarted</td>
-    </tr>
-    <tr>
-        <td>Queue</td>
-        <td>/JNDI/Q/tutorial</td>
-    </tr>
-</table>
+A difference to the publish/subscribe tutorial is that here an additional physical endpoint resource – a durable queue, associated with the Queue Destination – is required on the message router, which will persist the messages until consumed.
 
-The script also creates a durable queue named “Q/tutorial” and enables this queue. This script assumes the connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below.
+Using the Solace Dynamic Durables property enables the physical endpoint to be dynamically created if it doesn’t exist yet, when the JMS Queue Destination is created programmatically. For other ways of creating Solace message router resources, refer to the [Solace Documentation - Management Tools]({{ site.docs-management_tools }}){:target="_top"}
 
-```
-home
-enable
-configure
-message-spool message-vpn "default"
-! pragma:interpreter:ignore-already-exists
-  create queue "Q/tutorial" primary
-! pragma:interpreter:no-ignore-already-exists
-    access-type "exclusive"
-    permission all "delete"
-    no shutdown
-    exit
-  exit
-
-jndi message-vpn "default"
-  create connection-factory "/JNDI/CF/GettingStarted"
-    property-list "messaging-properties"
-        property "default-delivery-mode" "persistent"
-        property "text-msg-xml-payload" "false"
-        exit
-    exit
-
-  no queue "/JNDI/Q/tutorial"
-  create queue "/JNDI/Q/tutorial"
-      property "physical-name" "Q/tutorial"
-      exit
-  no shutdown
-  exit
-```
-
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
-
-The first time you run this script you will see an error running this command:
-
-```
-solace(configure/jndi)#   no topic "/JNDI/Q/tutorial "
-ERROR: Object '/JNDI/Q/tutorial' does not exist.
-Command Failed
-```
-
-This error can safely be ignored. Future releases of the Solace message router will allow this script to be cleaned up further to avoid this error. Users can learn more details on Solace JMS and JNDI by referring to the [Solace JMS Documentaiton]({{ site.docs-jms-home }}){:target="_top"}.
 
 ## Connecting a session to the message router
 
 As with other tutorials, this tutorial requires a JMS `Connection` to a Solace message router. So connect the JMS `Connection` as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
+
+Additionally, the Dynamic Durables property needs to be enabled to support the dynamic creation of the physical queue endpoint resource, as outlined in the previous section.
+
+```java
+cf.setDynamicDurables(true);
+```
 
 ## Sending a message to a queue
 
@@ -156,13 +107,25 @@ Now it is time to send a message to the queue.
 
 ![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
 
+Here we create a queue from the JMS Session programmatically. For other ways of obtaining a queue, for example using JNDI, refer to the [Solace Documentation - Working with Destinations]({{ site.docs-jms-working_with_destinations }}){:target="_top"}.
+
+Because the Dynamic Durables property has been enabled when creating the connection, it will ensure that the physical queue endpoint resource will also be created dynamically if it doesn’t exist.
+
+```java
+Queue queue = session.createQueue("Q/tutorial");
+```
+
+Next, the JMS MessageProducer  is created from the JMS Session.
+
+```java
+MessageProducer producer = session.createProducer(queue);
+```
+
 There is no difference in the actual method calls to the JMS `MessageProducer` when sending a PERSISTENT message as compared to a NON-PERSISTENT message shown in the publish/subscribe tutorial. The difference in the PERSISTENT message is that the Solace message router will acknowledge the message once it is successfully stored on the message router and the `MessageProducer.send()` call will not return until it has successfully received this acknowledgement. This means that in JMS, all calls to the `MessageProducer.send()` are blocking calls and they wait for message confirmation from the Solace message router before proceeding. This is outlined in the JMS 1.1 specification and Solace JMS adheres to this requirement.
 
 To send a message, you must still create a message. The difference from sending a NON-PERSISTENT message is that you must set the message delivery mode to PERSISTENT on send.
 
 ```java
-Queue queue = (Queue)initialContext.lookup("/JNDI/Q/tutorial");
-MessageProducer producer = session.createProducer(queue);
 TextMessage message = session.createTextMessage("Hello world Queues!");
 producer.send(queue,
               message,
