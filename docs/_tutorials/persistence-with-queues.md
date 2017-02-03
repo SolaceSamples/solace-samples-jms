@@ -78,7 +78,7 @@ At the end, this tutorial walks through downloading and running the sample from 
 
 
 
-## Solace message router JMS administered objects
+## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
 *   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
@@ -86,40 +86,31 @@ This tutorial will make use of two JMS administered objects:
 
 As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) we will use the approach of programmatically creating the required objects.
 
-A difference to the publish/subscribe tutorial is that here an additional physical endpoint resource – a durable queue, associated with the Queue Destination – is required on the message router, which will persist the messages until consumed.
+## Creating a durable queue on the Solace message router
 
-Using the Solace Dynamic Durables property enables the physical endpoint to be dynamically created if it doesn’t exist yet, when the JMS Queue Destination is created programmatically. For other ways of creating Solace message router resources, refer to the [Solace Documentation - Management Tools]({{ site.docs-management_tools }}){:target="_top"}
+A difference to the publish/subscribe tutorial is that here a physical endpoint resource – a durable queue, associated with the Queue Destination – needs to be created on the Solace message router, which will persist the messages until consumed.
 
+We will use the Dynamic Durables feature, which enables the physical endpoint resource to be dynamically created without any additional steps, when the JMS Queue Destination is created programmatically. It is also possible to create resources administratively on the router using the Solace message router [Management Tools]({{ site.docs-management-tools }}){:target="_top"}
 
-## Connecting a session to the message router
-
-As with other tutorials, this tutorial requires a JMS `Connection` to a Solace message router. So connect the JMS `Connection` as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
-
-Additionally, the Dynamic Durables property needs to be enabled to support the dynamic creation of the physical queue endpoint resource, as outlined in the previous section.
+To use Dynamic Durables, you need to connect the JMS Connection as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) with one additional property:
 
 ```java
 cf.setDynamicDurables(true);
 ```
+
+Then we simply create a queue from the JMS `Session`. For other ways of obtaining a queue, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
+
+```java
+Queue queue = session.createQueue("Q/tutorial");
+```
+
+Because the Dynamic Durables property has been enabled when creating the connection, it will ensure that the physical queue endpoint resource will also be created dynamically if it doesn’t exist.
 
 ## Sending a message to a queue
 
 Now it is time to send a message to the queue. 
 
 ![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
-
-Here we create a queue from the JMS Session programmatically. For other ways of obtaining a queue, for example using JNDI, refer to the [Solace Documentation - Working with Destinations]({{ site.docs-jms-working_with_destinations }}){:target="_top"}.
-
-Because the Dynamic Durables property has been enabled when creating the connection, it will ensure that the physical queue endpoint resource will also be created dynamically if it doesn’t exist.
-
-```java
-Queue queue = session.createQueue("Q/tutorial");
-```
-
-Next, the JMS MessageProducer  is created from the JMS Session.
-
-```java
-MessageProducer producer = session.createProducer(queue);
-```
 
 There is no difference in the actual method calls to the JMS `MessageProducer` when sending a PERSISTENT message as compared to a NON-PERSISTENT message shown in the publish/subscribe tutorial. The difference in the PERSISTENT message is that the Solace message router will acknowledge the message once it is successfully stored on the message router and the `MessageProducer.send()` call will not return until it has successfully received this acknowledgement. This means that in JMS, all calls to the `MessageProducer.send()` are blocking calls and they wait for message confirmation from the Solace message router before proceeding. This is outlined in the JMS 1.1 specification and Solace JMS adheres to this requirement.
 
@@ -142,7 +133,7 @@ Now it is time to receive the messages sent to your queue.
 
 ![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
 
-You still need to a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Messaging API Developer Guide – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
+You still need a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Documentation – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 ```java
 Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);

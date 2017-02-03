@@ -105,7 +105,7 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 At the end, this tutorial walks through downloading and running the sample from source.
 
 
-## Solace message router JMS administered objects
+## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
 *   A ConnectionFactory object – used by JMS clients to successfully connect to a message broker like a Solace message router
@@ -127,7 +127,7 @@ The programmatic approach is also the convention most often followed with JMS sa
 
 In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
 
-The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.obtaining_connection_factories }}){:target="_top"}.
+The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
 ```java
 SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
@@ -140,7 +140,7 @@ Connection connection = cf.createConnection();
 final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 ```
 
-This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Documentation]({{ site.docs-jms-connections }}){:target="_top"}.
+This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Documentation - Managing Sessions]({{ site.docs-jms-managing-sessions }}){:target="_top"}.
 
 At this point your client is connected to the Solace message router. You can use SolAdmin to view the client connection and related details.
 
@@ -152,7 +152,7 @@ With a session connected in the previous step, the next step is to create a mess
 
 ![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
 
-First a `Topic` object is required. Here we create a topic from the JMS Session session programmatically. For other ways of obtaining a `Topic`, for example using JNDI, refer to the [Solace Documentation - Working with Destinations]({{ site.docs-jms-working_with_destinations }}){:target="_top"}.
+First a `Topic` object is required. Here we create a topic from the JMS Session session programmatically. For other ways of obtaining a `Topic`, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
 
 Then create the `MessageConsumer` using the JMS `Session`.
 

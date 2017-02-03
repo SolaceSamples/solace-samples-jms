@@ -89,7 +89,7 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Solace message router JMS administered objects
+## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
 *   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
