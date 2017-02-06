@@ -108,14 +108,17 @@ At the end, this tutorial walks through downloading and running the sample from 
 ## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
+
 *   A ConnectionFactory object – used by JMS clients to successfully connect to a message broker like a Solace message router
 *   A Topic Destination – used for publishing and subscribing to messages. This example will use the topic `T/GettingStarted/pubsub`
 
 The [JMS specification](http://java.sun.com/products/jms/docs.html){:target="_blank"} provides two ways to create administered objects:
+
 *   JNDI Lookup 
 *   Programmatic creation through the JMS API.
 
 This tutorial will use the approach of programmatically creating the required objects. For developers, this is the recommended approach as this enables:
+
 *   Full control for the applications
 *   No requirement to preconfigure the JNDI on the Solace message router or within an LDAP server
 *   Easier integration into frameworks by avoiding external JNDI lookups.

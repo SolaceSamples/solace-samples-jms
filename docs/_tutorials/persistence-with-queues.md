@@ -81,6 +81,7 @@ At the end, this tutorial walks through downloading and running the sample from 
 ## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
+
 *   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
 *   A Queue Destination – Used for publishing and subscribing to messages. This example will use the queue `Q/tutorial`
 
