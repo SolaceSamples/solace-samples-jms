@@ -104,71 +104,43 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Configuring Solace JNDI
 
-In order for JMS clients to successfully connect to a message broker like a Solace message router, they need to look up a connection factory object using the Java Naming and Directory Interface (JNDI) service. Solace message routers provide a JNDI lookup service to make this integration easy.
+## JMS administered objects
 
-Additionally, this tutorial will make use of one JNDI topic for publishing and subscribing to messages. For simplicity in this tutorial, the following CLI script is provided. It will properly configure the default message-VPN with the necessary JNDI configuration.
+This tutorial will make use of two JMS administered objects:
+*   A ConnectionFactory object – used by JMS clients to successfully connect to a message broker like a Solace message router
+*   A Topic Destination – used for publishing and subscribing to messages. This example will use the topic `T/GettingStarted/pubsub`
 
-The script configures two required resources. This script assumes the connection factory and topic do not exist and creates them. If the JNDI connection factory or topic already exists you may need to remove the keyword “create” from the script below.
+The [JMS specification](http://java.sun.com/products/jms/docs.html){:target="_blank"} provides two ways to create administered objects:
+*   JNDI Lookup 
+*   Programmatic creation through the JMS API.
 
-<table>
-    <tr>
-        <th>Resource</th>
-        <th>Value</th>
-    </tr>
-    <tr>
-        <td>Connection Factory</td>
-        <td>/JNDI/CF/GettingStarted</td>
-    </tr>
-    <tr>
-        <td>Topic</td>
-        <td>/JNDI/T/GettingStarted/pubsub</td>
-    </tr>
-</table>
+This tutorial will use the approach of programmatically creating the required objects. For developers, this is the recommended approach as this enables:
+*   Full control for the applications
+*   No requirement to preconfigure the JNDI on the Solace message router or within an LDAP server
+*   Easier integration into frameworks by avoiding external JNDI lookups.
 
-```
-home
-enable
-configure
-jndi message-vpn "default"
-    create connection-factory "/JNDI/CF/GettingStarted"
-        property-list "messaging-properties"
-            property "default-delivery-mode" "persistent"
-             property "text-msg-xml-payload" "false"
-             exit
-        exit
-    create topic "/JNDI/T/GettingStarted/pubsub"
-         property "physical-name" "T/GettingStarted/pubsub"
-         exit
-    no shutdown
-    exit
-```
+The programmatic approach is also the convention most often followed with JMS samples. So it should be familiar to developers of JMS application. The Solace JMS API supports both programmatically creating administered objects and JNDI lookup. Developers can learn all about Solace JMS by referring to the [Solace JMS Documentation]({{ site.docs-jms-home }}){:target="_top"}.
 
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
-
-Users can learn more details on Solace JMS and JNDI by referring to the [Solace JMS Documentation]({{ site.docs-jms-home }}){:target="_top"}.
 
 ## Connecting to the Solace message router
 
-In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used to as a factory for consumers and producers. The following code shows how to create a connection using Solace JNDI.
+In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
+
+The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
 ```java
-Hashtable<String, Object> env = new Hashtable<String, Object>();
-env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-env.put(InitialContext.PROVIDER_URL, (String)args[0]);
-env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-env.put(Context.SECURITY_CREDENTIALS, "password");
-
-InitialContext initialContext = new InitialContext(env);
-ConnectionFactory cf = (ConnectionFactory)initialContext.lookup("/JNDI/CF/GettingStarted");
+SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
+cf.setHost((String) args[0]);
+cf.setVPN("default");
+cf.setUsername("clientUsername");
+cf.setPassword("password");
 
 Connection connection = cf.createConnection();
 final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 ```
 
-This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Messaging API Developer Guide – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
+This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Documentation - Managing Sessions]({{ site.docs-jms-managing-sessions }}){:target="_top"}.
 
 At this point your client is connected to the Solace message router. You can use SolAdmin to view the client connection and related details.
 
@@ -180,13 +152,13 @@ With a session connected in the previous step, the next step is to create a mess
 
 ![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
 
-First, look up the topic in the Solace JNDI. Alternatively JMS allows for topics to be created using the session. Creating topics from the session is easier because it involves fewer configuration steps but it is less portable.
+First a `Topic` object is required. Here we create a topic from the JMS Session session programmatically. For other ways of obtaining a `Topic`, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
 
 Then create the `MessageConsumer` using the JMS `Session`.
 
 ```java
-// Lookup Topic in Solace JNDI.
-final Topic topic = (Topic)initialContext.lookup("/JNDI/T/GettingStarted/pubsub");
+final Topic topic = session.createTopic("T/GettingStarted/pubsub");
+
 final MessageConsumer consumer = session.createConsumer(topic);
 ```
 
@@ -247,8 +219,7 @@ Now it is time to send a message to the waiting consumer.
 In JMS, a message producer is required for sending messages to a Solace message router.
 
 ```java
-// Lookup Topic in Solace JNDI.
-final Topic publishDestination = (Topic)initialContext.lookup( "/JNDI/T/GettingStarted/pubsub" );
+final Topic topic = session.createTopic("T/GettingStarted/pubsub");
 
 final MessageProducer producer = session.createProducer(publishDestination);
 ```

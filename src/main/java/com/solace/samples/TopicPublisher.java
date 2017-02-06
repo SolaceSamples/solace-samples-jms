@@ -19,20 +19,15 @@
 
 package com.solace.samples;
 
-import java.util.Hashtable;
-
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
-import com.solacesystems.jms.SupportedProperty;
+import com.solacesystems.jms.SolConnectionFactory;
+import com.solacesystems.jms.SolJmsUtility;
 
 public class TopicPublisher {
 
@@ -40,29 +35,24 @@ public class TopicPublisher {
 
         System.out.println("TopicPublisher initializing...");
 
-        // The client needs to specify both of the following properties:
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-        env.put(Context.SECURITY_CREDENTIALS, "password");
-
-        // InitialContext is used to lookup the JMS administered objects.
-        InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        ConnectionFactory cf = (ConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
+        // Programmatically create the connection factory using default settings
+        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
+        cf.setHost((String) args[0]);
+        cf.setVPN("default");
+        cf.setUsername("clientUsername");
+        cf.setPassword("password");
+        
         // JMS Connection
         Connection connection = cf.createConnection();
 
         // Create a non-transacted, Auto Ack session.
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        // Lookup Topic in Solace JNDI.
-        final Topic publishDestination = (Topic) initialContext.lookup("/JNDI/T/GettingStarted/pubsub");
+        // Create the topic programmatically
+        Topic publishDestination = session.createTopic("T/GettingStarted/pubsub");
 
         final MessageProducer producer = session.createProducer(publishDestination);
-
+        
         TextMessage message = session.createTextMessage("Hello world!");
 
         System.out.printf("Connected. About to send request message '%s' to topic '%s'...%n", message.getText(),
@@ -75,7 +65,6 @@ public class TopicPublisher {
 
         // Close consumer
         connection.close();
-        initialContext.close();
         System.out.println("Message sent. Exiting.");
     }
 

@@ -19,7 +19,6 @@
 
 package com.solace.samples;
 
-import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 
 import javax.jms.JMSException;
@@ -28,12 +27,9 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
+import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 import com.solacesystems.jms.SupportedProperty;
 
@@ -43,26 +39,26 @@ public class QueueConsumer {
 
         System.out.println("QueueConsumer initializing...");
 
-        // The client needs to specify both of the following properties:
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-        env.put(Context.SECURITY_CREDENTIALS, "password");
+        // Programmatically create the connection factory using default settings
+        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
+        cf.setHost((String) args[0]);
+        cf.setVPN("default");
+        cf.setUsername("clientUsername");
+        cf.setPassword("password");
+ 
+        // Enables persistent queues or topic endpoints to be created dynamically
+        // on the router, used when Session.createQueue() is called below
+        cf.setDynamicDurables(true);
 
-        // InitialContext is used to lookup the JMS administered objects.
-        InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        QueueConnectionFactory cf = (QueueConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
         // JMS Connection
         QueueConnection connection = cf.createQueueConnection();
 
         // Create a non-transacted, Client Ack session.
         Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
-        // Lookup Queue.
-        Queue queue = (Queue) initialContext.lookup("/JNDI/Q/tutorial");
+        // Create the queue programmatically and the corresponding router resource
+        // will also be created dynamically because DynamicDurables is enabled.
+        Queue queue = session.createQueue("Q/tutorial");
 
         // Latch used for synchronizing b/w threads
         final CountDownLatch latch = new CountDownLatch(1);
@@ -110,7 +106,6 @@ public class QueueConsumer {
 
         // Close consumer
         connection.close();
-        initialContext.close();
         System.out.println("Exiting.");
     }
 

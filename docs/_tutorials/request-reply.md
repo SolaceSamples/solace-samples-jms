@@ -89,50 +89,13 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Configuring Solace JNDI
+## JMS administered objects
 
-As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) in order for JMS clients to successfully connect to a message broker like a Solace message router, they need to look up a connection factory object using the Java Naming and Directory Interface (JNDI) service. Solace message routers provide a JNDI lookup service to make this integration easy.
+This tutorial will make use of two JMS administered objects:
+*   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
+*   A Queue Destination – Used for publishing and subscribing to messages. This example will use the topic `T/GettingStarted/requests`
 
-Additionally, this tutorial will make use of one JNDI topic of requests. For simplicity in this tutorial, the following CLI script is provided. It will properly configure the default message-VPN with the necessary JNDI configuration. It assumes the connection factory and topic do not exist and creates them. If the JNDI connection factory or topic already exists you may need to remove the keyword “create” from the script below.
-
-The script configures two required resources.
-
-<table>
-    <tr>
-        <th>Resource</th>
-        <th>Value</th>
-    </tr>
-    <tr>
-        <td>Connection Factory</td>
-        <td>/JNDI/CF/GettingStarted</td>
-    </tr>
-    <tr>
-        <td>Topic</td>
-        <td>/JNDI/T/GettingStarted/requests</td>
-    </tr>
-</table>
-
-```
-home
-enable
-configure
-jndi message-vpn "default"
-    create connection-factory "/JNDI/CF/GettingStarted"
-        property-list "messaging-properties"
-            property "default-delivery-mode" "persistent"
-            property "text-msg-xml-payload" "false"
-            exit
-        exit
-    create topic "/JNDI/T/GettingStarted/requests"
-        property "physical-name" "T/GettingStarted/requests"
-        exit
-    no shutdown
-    exit
-```
-
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
-
-Users can learn more details on Solace JMS and JNDI by referring to the [SolAdmin User Guide – Configuring JMS Objects]({{ site.docs-jms-home }}){:target="_top"}.
+As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) we will use the approach of programmatically creating the required objects.
 
 ## Connecting a session to the message router
 
@@ -154,7 +117,7 @@ connection.start();
 With the connection started, now the Requestor is ready to receive any reply messages on its temporary JMS Queue. Next you must create a message and the topic to send the message to. This is done in the same way as illustrated in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
 
 ```java
-final Topic requestDestination = (Topic)initialContext.lookup("/JNDI/T/GettingStarted/requests");
+final Topic requestDestination = session.createTopic("T/GettingStarted/requests");
 TextMessage request = session.createTextMessage();
 final String text = "Sample Request";
 request.setText(text);
@@ -194,7 +157,7 @@ Now it is time to receive the request and generate an appropriate reply.
 Just as with previous tutorials, you still need to connect a JMS Connection and Session and create a MessageConsumer to receive request messages. However, in order to send replies back to the requestor, you will also need a MessageProducer. The following code will create the producer and consumer that is required.
 
 ```java
-final Topic topic = (Topic)initialContext.lookup("/JNDI/T/GettingStarted/requests");
+final Topic topic = session.createTopic("T/GettingStarted/requests");
 final MessageProducer producer = session.createProducer(topic);
 final MessageConsumer consumer = session.createConsumer(topic);
 ```

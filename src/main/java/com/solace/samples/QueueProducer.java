@@ -19,20 +19,15 @@
 
 package com.solace.samples;
 
-import java.util.Hashtable;
-
 import javax.jms.DeliveryMode;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
-import com.solacesystems.jms.SupportedProperty;
+import com.solacesystems.jms.SolConnectionFactory;
+import com.solacesystems.jms.SolJmsUtility;
 
 public class QueueProducer {
 
@@ -40,26 +35,26 @@ public class QueueProducer {
 
         System.out.println("QueueProducer initializing...");
 
-        // The client needs to specify all of the following properties:
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-        env.put(Context.SECURITY_CREDENTIALS, "password");
+        // Programmatically create the connection factory using default settings
+        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
+        cf.setHost((String) args[0]);
+        cf.setVPN("default");
+        cf.setUsername("clientUsername");
+        cf.setPassword("password");
+ 
+        // Enables persistent queues or topic endpoints to be created dynamically
+        // on the router, used when Session.createQueue() is called below
+        cf.setDynamicDurables(true);
 
-        // InitialContext is used to lookup the JMS administered objects.
-        InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        QueueConnectionFactory cf = (QueueConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
         // JMS Connection
         QueueConnection connection = cf.createQueueConnection();
 
         // Create a non-transacted, Auto Ack session.
         Session session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        // Lookup Queue.
-        Queue queue = (Queue) initialContext.lookup("/JNDI/Q/tutorial");
+        // Create the queue programmatically and the corresponding router resource
+        // will also be created dynamically because DynamicDurables is enabled.
+        Queue queue = session.createQueue("Q/tutorial");
 
         // From the session, create a producer for the destination.
         // Use the default delivery mode as set in the connection factory
@@ -76,7 +71,6 @@ public class QueueProducer {
         System.out.println("Message sent. Exiting.");
 
         connection.close();
-        initialContext.close();
     }
 
     public static void main(String... args) throws Exception {

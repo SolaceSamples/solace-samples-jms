@@ -19,11 +19,9 @@
 
 package com.solace.samples;
 
-import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -31,38 +29,31 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
-import com.solacesystems.jms.SupportedProperty;
 
 public class TopicSubscriber {
 
-    public void run(String... args) throws JMSException, NamingException {
+    public void run(String... args) throws Exception, JMSException, NamingException {
         System.out.println("TopicSubscriber initializing...");
 
-        // The client needs to specify both of the following properties:
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
-        env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-        env.put(Context.SECURITY_CREDENTIALS, "password");
-
-        // InitialContext is used to lookup the JMS administered objects.
-        InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        ConnectionFactory cf = (ConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
+        // Programmatically create the connection factory using default settings
+        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
+        cf.setHost((String) args[0]);
+        cf.setVPN("default");
+        cf.setUsername("clientUsername");
+        cf.setPassword("password");
+        
         // JMS Connection
         Connection connection = cf.createConnection();
 
         // Create a non-transacted, Auto Ack session.
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        // Lookup Topic in Solace JNDI.
-        final Topic topic = (Topic) initialContext.lookup("/JNDI/T/GettingStarted/pubsub");
+        // Create the subscription topic programmatically
+        final Topic topic = session.createTopic("T/GettingStarted/pubsub");
 
         // Latch used for synchronizing b/w threads
         final CountDownLatch latch = new CountDownLatch(1);
@@ -104,11 +95,10 @@ public class TopicSubscriber {
 
         // Close consumer
         connection.close();
-        initialContext.close();
         System.out.println("Exiting.");
     }
 
-    public static void main(String... args) throws JMSException, NamingException {
+    public static void main(String... args) throws Exception, JMSException, NamingException {
 
         // Check command line arguments
         if (args.length < 1) {

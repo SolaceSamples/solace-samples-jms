@@ -76,79 +76,35 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Configuring Solace JNDI
 
-In order for JMS clients to successfully connect to a message broker like a Solace message router, they need to look up a connection factory object using the Java Naming and Directory Interface (JNDI) service. Solace message routers provide a JNDI lookup service to make this integration easy.
 
-Additionally, this tutorial will make use of one JNDI topic for publishing and subscribing to messages. For simplicity in this tutorial, the following CLI script is provided. It will do the following:
+## JMS administered objects
 
-*   Properly configure the default message-VPN with the necessary JNDI configuration.
-*   Create the required durable Queue
+This tutorial will make use of two JMS administered objects:
+*   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
+*   A Queue Destination – Used for publishing and subscribing to messages. This example will use the queue `Q/tutorial`
 
-The script configures these required JNDI resources:
+As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) we will use the approach of programmatically creating the required objects.
 
-<table>
-    <tr>
-        <th>Resource</th>
-        <th>Value</th>
-    </tr>
-    <tr>
-        <td>Connection Factory</td>
-        <td>/JNDI/CF/GettingStarted</td>
-    </tr>
-    <tr>
-        <td>Queue</td>
-        <td>/JNDI/Q/tutorial</td>
-    </tr>
-</table>
+## Creating a durable queue on the Solace message router
 
-The script also creates a durable queue named “Q/tutorial” and enables this queue. This script assumes the connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below.
+A difference to the publish/subscribe tutorial is that here a physical endpoint resource – a durable queue, associated with the Queue Destination – needs to be created on the Solace message router, which will persist the messages until consumed.
 
-```
-home
-enable
-configure
-message-spool message-vpn "default"
-! pragma:interpreter:ignore-already-exists
-  create queue "Q/tutorial" primary
-! pragma:interpreter:no-ignore-already-exists
-    access-type "exclusive"
-    permission all "delete"
-    no shutdown
-    exit
-  exit
+We will use the Dynamic Durables feature, which enables the physical endpoint resource to be dynamically created without any additional steps, when the JMS Queue Destination is created programmatically. It is also possible to create resources administratively on the router using the Solace message router [Management Tools]({{ site.docs-management-tools }}){:target="_top"}
 
-jndi message-vpn "default"
-  create connection-factory "/JNDI/CF/GettingStarted"
-    property-list "messaging-properties"
-        property "default-delivery-mode" "persistent"
-        property "text-msg-xml-payload" "false"
-        exit
-    exit
+To use Dynamic Durables, you need to connect the JMS Connection as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) with one additional property:
 
-  no queue "/JNDI/Q/tutorial"
-  create queue "/JNDI/Q/tutorial"
-      property "physical-name" "Q/tutorial"
-      exit
-  no shutdown
-  exit
+```java
+cf.setDynamicDurables(true);
 ```
 
-To apply this configuration, simply log in to the Solace message router CLI as an admin user. See the [VMR getting started]({{ site.docs-vmr-setup }}){:target="_top"} tutorial for default credentials and accounts. Then paste the above script into the CLI.
+Then we simply create a queue from the JMS `Session`. For other ways of obtaining a queue, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
 
-The first time you run this script you will see an error running this command:
-
-```
-solace(configure/jndi)#   no topic "/JNDI/Q/tutorial "
-ERROR: Object '/JNDI/Q/tutorial' does not exist.
-Command Failed
+```java
+Queue queue = session.createQueue("Q/tutorial");
 ```
 
-This error can safely be ignored. Future releases of the Solace message router will allow this script to be cleaned up further to avoid this error. Users can learn more details on Solace JMS and JNDI by referring to the [Solace JMS Documentaiton]({{ site.docs-jms-home }}){:target="_top"}.
-
-## Connecting a session to the message router
-
-As with other tutorials, this tutorial requires a JMS `Connection` to a Solace message router. So connect the JMS `Connection` as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
+Because the Dynamic Durables property has been enabled when creating the connection, it will ensure that the physical queue endpoint resource will also be created dynamically if it doesn’t exist.
 
 ## Sending a message to a queue
 
@@ -161,8 +117,6 @@ There is no difference in the actual method calls to the JMS `MessageProducer` w
 To send a message, you must still create a message. The difference from sending a NON-PERSISTENT message is that you must set the message delivery mode to PERSISTENT on send.
 
 ```java
-Queue queue = (Queue)initialContext.lookup("/JNDI/Q/tutorial");
-MessageProducer producer = session.createProducer(queue);
 TextMessage message = session.createTextMessage("Hello world Queues!");
 producer.send(queue,
               message,
@@ -179,7 +133,7 @@ Now it is time to receive the messages sent to your queue.
 
 ![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
 
-You still need to a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Messaging API Developer Guide – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
+You still need a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Documentation – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 ```java
 Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
