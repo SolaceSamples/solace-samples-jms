@@ -19,9 +19,9 @@ Solace message routers provide a JNDI service to make this integration easy, whi
 
 The goal of this tutorial is to demonstrate the use of JNDI as a way to create JMS objects. This tutorial will show you following steps:
 
-1.	How to configure the JNDI service on a Solace message router
-2.	How to retrieve a JMS Connection Factory using JNDI so the client can connect to the Solace message router
-3.	How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
+1.	Step 1 - How to configure the JNDI service on a Solace message router
+2.	Step 2 - How to retrieve a JMS Connection Factory using JNDI so the client can connect to the Solace message router
+3.	Step 3 - How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
 
 ### Assumptions
 
