@@ -42,7 +42,8 @@ public class QueueConsumer {
         // Programmatically create the connection factory using default settings
         SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
         cf.setHost((String) args[0]);
-        cf.setVPN("default");
+        // use default message-VPN unless specified
+        cf.setVPN(args.length > 1 && args[1] != null ? args[1] : "default");
         cf.setUsername("clientUsername");
         cf.setPassword("password");
  
@@ -113,7 +114,8 @@ public class QueueConsumer {
 
         // Check command line arguments
         if (args.length < 1) {
-            System.out.println("Usage: QueueConsumer <msg_backbone_ip:port>");
+            System.out.println("Usage: QueueConsumer <msg_backbone_ip:port> " +
+            		"[<message-vpn>]");
             System.exit(-1);
         }
 
