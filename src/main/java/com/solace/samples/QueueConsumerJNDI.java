@@ -47,8 +47,7 @@ public class QueueConsumerJNDI {
         Hashtable<String, Object> env = new Hashtable<String, Object>();
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
         env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
+        env.put(Context.SECURITY_PRINCIPAL, "clientUsername@default");    // Formatted as user@message-vpn
         env.put(Context.SECURITY_CREDENTIALS, "password");
 
         // InitialContext is used to lookup the JMS administered objects.
