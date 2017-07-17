@@ -11,3 +11,5 @@ _site/
 .settings/
 /bin/
 docs/_site
+/target/
+*.bak
