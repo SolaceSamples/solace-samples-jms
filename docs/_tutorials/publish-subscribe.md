@@ -90,7 +90,7 @@ compile("com.solacesystems:sol-jms:10.+")
 <dependency>
   <groupId>com.solacesystems</groupId>
   <artifactId>sol-jms</artifactId>
-  <version>10.+</version>
+  <version>[10,)</version>
 </dependency>
 ```
 

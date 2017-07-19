@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: TopicPublisher
+ */
+
 package com.solace.samples;
 
 import javax.jms.Connection;
@@ -26,57 +30,70 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 
+/**
+ * Publishes a messages to a topic using Solace JMS 1.1 API implementation.
+ * 
+ * This is the Publisher in the Publish/Subscribe messaging pattern.
+ */
 public class TopicPublisher {
 
-    public void run(String... args) throws Exception {
+    final String SOLACE_HOST = "192.168.133.8:55555";
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
 
-        System.out.println("TopicPublisher initializing...");
+    final String TOPIC_NAME = "T/GettingStarted/pubsub";
+
+    public void run() throws Exception {
+        System.out.printf("TopicPublisher is connecting to Solace router %s...%n", SOLACE_HOST);
 
         // Programmatically create the connection factory using default settings
-        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
-        cf.setHost((String) args[0]);
-        cf.setVPN("default");
-        cf.setUsername("clientUsername");
-        cf.setPassword("password");
-        
-        // JMS Connection
-        Connection connection = cf.createConnection();
+        SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
+        connectionFactory.setHost(SOLACE_HOST);
+        connectionFactory.setVPN(SOLACE_VPN);
+        connectionFactory.setUsername(SOLACE_USERNAME);
+        connectionFactory.setPassword(SOLACE_PASSWORD);
 
-        // Create a non-transacted, Auto Ack session.
-        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
 
-        // Create the topic programmatically
-        Topic publishDestination = session.createTopic("T/GettingStarted/pubsub");
+        // Create a non-transacted, Auto ACK session.
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        final MessageProducer producer = session.createProducer(publishDestination);
-        
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
+
+        // Create the publishing topic programmatically
+        Topic topic = session.createTopic(TOPIC_NAME);
+
+        // Create the message producer for the created topic
+        MessageProducer messageProducer = session.createProducer(topic);
+
+        // Create the message
         TextMessage message = session.createTextMessage("Hello world!");
 
-        System.out.printf("Connected. About to send request message '%s' to topic '%s'...%n", message.getText(),
-                publishDestination.toString());
+        System.out.printf("Sending message '%s' to topic '%s'...%n", message.getText(), topic.toString());
 
-        // Leaving priority and Time to Live to their defaults.
-        // NOTE: Priority is not supported by the Solace Message Bus
-        producer.send(publishDestination, message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY,
-                Message.DEFAULT_TIME_TO_LIVE);
+        // Send the message
+        // NOTE: JMS Message Priority is not supported by the Solace Message Bus
+        messageProducer.send(message, DeliveryMode.NON_PERSISTENT,
+                Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+        System.out.println("Sent successfully. Exiting...");
 
-        // Close consumer
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        messageProducer.close();
+        session.close();
         connection.close();
-        System.out.println("Message sent. Exiting.");
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
-        if (args.length < 1) {
-            System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
-            System.exit(-1);
-        }
-
-        TopicPublisher app = new TopicPublisher();
-        app.run(args);
+        new TopicPublisher().run();
     }
 }
