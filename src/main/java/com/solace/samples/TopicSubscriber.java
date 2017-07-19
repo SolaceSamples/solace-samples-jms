@@ -44,7 +44,6 @@ import com.solacesystems.jms.SolJmsUtility;
  */
 public class TopicSubscriber {
 
-    final String SOLACE_HOST = "192.168.133.8:55555";
     final String SOLACE_VPN = "default";
     final String SOLACE_USERNAME = "clientUsername";
     final String SOLACE_PASSWORD = "password";
@@ -54,12 +53,13 @@ public class TopicSubscriber {
     // Latch used for synchronizing between threads
     final CountDownLatch latch = new CountDownLatch(1);
 
-    public void run() throws Exception {
-        System.out.printf("TopicSubscriber is connecting to Solace router %s...%n", SOLACE_HOST);
+    public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("TopicSubscriber is connecting to Solace router %s...%n", solaceHost);
 
         // Programmatically create the connection factory using default settings
         SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-        connectionFactory.setHost(SOLACE_HOST);
+        connectionFactory.setHost(solaceHost);
         connectionFactory.setVPN(SOLACE_VPN);
         connectionFactory.setUsername(SOLACE_USERNAME);
         connectionFactory.setPassword(SOLACE_PASSWORD);
@@ -112,6 +112,10 @@ public class TopicSubscriber {
     }
 
     public static void main(String... args) throws Exception, JMSException, NamingException {
-        new TopicSubscriber().run();
+        if (args.length < 1) {
+            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new TopicSubscriber().run(args);
     }
 }

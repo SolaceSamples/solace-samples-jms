@@ -41,19 +41,19 @@ import com.solacesystems.jms.SolJmsUtility;
  */
 public class TopicPublisher {
 
-    final String SOLACE_HOST = "192.168.133.8:55555";
     final String SOLACE_VPN = "default";
     final String SOLACE_USERNAME = "clientUsername";
     final String SOLACE_PASSWORD = "password";
 
     final String TOPIC_NAME = "T/GettingStarted/pubsub";
 
-    public void run() throws Exception {
-        System.out.printf("TopicPublisher is connecting to Solace router %s...%n", SOLACE_HOST);
+    public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("TopicPublisher is connecting to Solace router %s...%n", solaceHost);
 
         // Programmatically create the connection factory using default settings
         SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-        connectionFactory.setHost(SOLACE_HOST);
+        connectionFactory.setHost(solaceHost);
         connectionFactory.setVPN(SOLACE_VPN);
         connectionFactory.setUsername(SOLACE_USERNAME);
         connectionFactory.setPassword(SOLACE_PASSWORD);
@@ -94,6 +94,10 @@ public class TopicPublisher {
     }
 
     public static void main(String... args) throws Exception {
-        new TopicPublisher().run();
+        if (args.length < 1) {
+            System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new TopicPublisher().run(args);
     }
 }
