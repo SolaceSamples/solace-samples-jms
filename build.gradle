@@ -44,7 +44,9 @@ def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
 				 'queueProducer':'com.solace.samples.QueueProducer',
 				 'queueConsumer':'com.solace.samples.QueueConsumer',
 				 'basicRequestor':'com.solace.samples.BasicRequestor',
-				 'basicReplier':'com.solace.samples.BasicReplier'
+				 'basicReplier':'com.solace.samples.BasicReplier',
+				 'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
+				 'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI'
 ]
   scripts.each() { scriptName, className ->
           def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
