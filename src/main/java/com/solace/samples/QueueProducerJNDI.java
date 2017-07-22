@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,16 +17,20 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: QueueProducerJNDI
+ */
+
 package com.solace.samples;
 
 import java.util.Hashtable;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
@@ -34,60 +38,82 @@ import javax.naming.InitialContext;
 
 import com.solacesystems.jms.SupportedProperty;
 
+/**
+ * Sends a persistent message to a queue using Solace JMS API implementation.
+ * 
+ * The queue used for messages must exist on the message broker.
+ */
 public class QueueProducerJNDI {
 
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
+
+    final String QUEUE_NAME = "Q/tutorial";
+    final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
+    final String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
+
     public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("QueueProducerJNDI is connecting to Solace router %s...%n", solaceHost);
 
-        System.out.println("QueueProducer initializing...");
-
-        // The client needs to specify all of the following properties:
+        // setup environment variables for creating of the initial context
         Hashtable<String, Object> env = new Hashtable<String, Object>();
+        // use the Solace JNDI initial context factory
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, "default");
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
-        env.put(Context.SECURITY_CREDENTIALS, "password");
+        // assign Solace message router connection parameters
+        env.put(InitialContext.PROVIDER_URL, solaceHost);
+        env.put(SupportedProperty.SOLACE_JMS_VPN, SOLACE_VPN);
+        env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME);
+        env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
 
-        // InitialContext is used to lookup the JMS administered objects.
+        // Create the initial context that will be used to lookup the JMS Administered Objects.
         InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        QueueConnectionFactory cf = (QueueConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
-        // JMS Connection
-        QueueConnection connection = cf.createQueueConnection();
+        // Lookup the connection factory
+        ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup(CONNECTION_FACTORY_JNDI_NAME);
 
-        // Create a non-transacted, Auto Ack session.
-        Session session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
 
-        // Lookup Queue.
-        Queue queue = (Queue) initialContext.lookup("/JNDI/Q/tutorial");
+        // Create a non-transacted, auto ACK session.
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        // From the session, create a producer for the destination.
-        // Use the default delivery mode as set in the connection factory
-        MessageProducer producer = session.createProducer(queue);
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
+
+        // Lookup the queue.
+        Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
+
+        // Create the message producer for the created queue
+        MessageProducer messageProducer = session.createProducer(queue);
 
         // Create a text message.
         TextMessage message = session.createTextMessage("Hello world Queues!");
 
-        System.out.printf("Connected. About to send message '%s' to queue '%s'...%n", message.getText(),
-                queue.toString());
+        System.out.printf("Sending message '%s' to queue '%s'...%n", message.getText(), queue.toString());
 
-        producer.send(queue, message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+        // Send the message
+        // NOTE: JMS Message Priority is not supported by the Solace Message Bus
+        messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 
-        System.out.println("Message sent. Exiting.");
+        System.out.println("Sent successfully. Exiting...");
 
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        messageProducer.close();
+        session.close();
         connection.close();
+        // The initial context needs to be close; it does not extend AutoCloseable
         initialContext.close();
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
-        if (args.length < 1) {
-            System.out.println("Usage: QueueProducer <msg_backbone_ip:port>");
-            System.exit(-1);
-        }
-
-        QueueProducer app = new QueueProducer();
-        app.run(args);
+        // if (args.length < 1) {
+        // System.out.println("Usage: QueueProducer <msg_backbone_ip:port>");
+        // System.exit(-1);
+        // }
+        new QueueProducerJNDI().run("192.168.133.8:55555");
     }
 }

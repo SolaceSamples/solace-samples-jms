@@ -133,11 +133,17 @@ In order to send or receive messages, an application must connect to the Solace 
 The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
 ```java
+final String SOLACE_VPN = "default";
+final String SOLACE_USERNAME = "clientUsername";
+final String SOLACE_PASSWORD = "password";
+
+String solaceHost = args[0];
+
 SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-connectionFactory.setHost((String) args[0]);
-connectionFactory.setVPN("default");
-connectionFactory.setUsername("clientUsername");
-connectionFactory.setPassword("password");
+connectionFactory.setHost(solaceHost);
+connectionFactory.setVPN(SOLACE_VPN);
+connectionFactory.setUsername(SOLACE_USERNAME);
+connectionFactory.setPassword(SOLACE_PASSWORD);
 
 Connection connection = connectionFactory.createConnection();
 Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -160,7 +166,9 @@ First a `Topic` object is required. Here we create a topic from the JMS Session 
 Then create the `MessageConsumer` using the JMS `Session`.
 
 ```java
-Topic topic = session.createTopic("T/GettingStarted/pubsub");
+final String TOPIC_NAME = "T/GettingStarted/pubsub";
+
+Topic topic = session.createTopic(TOPIC_NAME);
 
 MessageConsumer messageConsumer = session.createConsumer(topic);
 ```
@@ -215,7 +223,9 @@ Now it is time to send a message to the waiting consumer.
 In JMS, a message producer is required for sending messages to a Solace message router.
 
 ```java
-Topic topic = session.createTopic("T/GettingStarted/pubsub");
+final String TOPIC_NAME = "T/GettingStarted/pubsub";
+
+Topic topic = session.createTopic(TOPIC_NAME);
 
 MessageProducer messageProducer = session.createProducer(topic);
 ```

@@ -62,7 +62,7 @@ compile("com.solacesystems:sol-jms:10.+")
 <dependency>
   <groupId>com.solacesystems</groupId>
   <artifactId>sol-jms</artifactId>
-  <version>10.+</version>
+  <version>[10,)</version>
 </dependency>
 ```
 
@@ -96,13 +96,14 @@ We will use the Dynamic Durables feature, which enables the physical endpoint re
 To use Dynamic Durables, you need to connect the JMS Connection as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) with one additional property:
 
 ```java
-cf.setDynamicDurables(true);
+connectionFactory.setDynamicDurables(true);
 ```
 
 Then we simply create a queue from the JMS `Session`. For other ways of obtaining a queue, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
 
 ```java
-Queue queue = session.createQueue("Q/tutorial");
+final String QUEUE_NAME = "Q/tutorial";
+Queue queue = session.createQueue(QUEUE_NAME);
 ```
 
 Because the Dynamic Durables property has been enabled when creating the connection, it will ensure that the physical queue endpoint resource will also be created dynamically if it doesn’t exist.
@@ -119,11 +120,7 @@ To send a message, you must still create a message. The difference from sending 
 
 ```java
 TextMessage message = session.createTextMessage("Hello world Queues!");
-producer.send(queue,
-              message,
-              DeliveryMode.PERSISTENT,
-              Message.DEFAULT_PRIORITY,
-              Message.DEFAULT_TIME_TO_LIVE);
+messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 ```
 
 At this point the producer has sent a message to the Solace message router and it will be waiting for your consumer on the queue.
@@ -137,29 +134,32 @@ Now it is time to receive the messages sent to your queue.
 You still need a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Documentation – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 ```java
-Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
+Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 ```
 
 Then your `MessageConsumer` can remain the same as before, only add a call to `message.acknowledge()` once you’re done processing the message.
 
 ```java
-public void onMessage(Message message) {
+messageConsumer.setMessageListener(new MessageListener() {
+    @Override
+    public void onMessage(Message message) {
+        try {
+            if (message instanceof TextMessage) {
+                System.out.printf("TextMessage received: '%s'%n", ((TextMessage) message).getText());
+            } else {
+                System.out.println("Message received.");
+            }
+            System.out.printf("Message Content:%n%s%n", message.toString());
 
-    try {
-        if (message instanceof TextMessage) {
-            System.out.printf("TextMessage received: '%s'%n",
-                    ((TextMessage)message).getText());
-        } else {
-            System.out.println("Message received.");
+            message.acknowledge();
+
+            latch.countDown(); // unblock the main thread
+        } catch (JMSException ex) {
+            System.out.println("Error processing incoming message.");
+            ex.printStackTrace();
         }
-        System.out.printf("Message Dump:%n%s%n",SolJmsUtility.dumpMessage(message));
-        message.acknowledge();
-        latch.countDown(); // unblock main thread
-    } catch (JMSException e) {
-        System.out.println("Error processing incoming message.");
-        e.printStackTrace();
     }
-}
+});
 ```
 
 ## Summarizing

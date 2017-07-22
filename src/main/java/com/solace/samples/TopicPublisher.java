@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -61,7 +61,7 @@ public class TopicPublisher {
         // Create connection to the Solace router
         Connection connection = connectionFactory.createConnection();
 
-        // Create a non-transacted, Auto ACK session.
+        // Create a non-transacted, auto ACK session.
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
         System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
@@ -94,10 +94,10 @@ public class TopicPublisher {
     }
 
     public static void main(String... args) throws Exception {
-        if (args.length < 1) {
-            System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
-            System.exit(-1);
-        }
-        new TopicPublisher().run(args);
+        // if (args.length < 1) {
+        // System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
+        // System.exit(-1);
+        // }
+        new TopicPublisher().run("192.168.133.8:55555");
     }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,6 +20,7 @@
 /**
  *  Solace JMS 1.1 Examples: TopicSubscriber
  */
+
 package com.solace.samples;
 
 import java.util.concurrent.CountDownLatch;
@@ -77,7 +78,7 @@ public class TopicSubscriber {
         // Create the message consumer for the subscription topic
         MessageConsumer messageConsumer = session.createConsumer(topic);
 
-        /// Use the anonymous inner class for receiving messages asynchronously
+        // Use the anonymous inner class for receiving messages asynchronously
         messageConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
@@ -102,6 +103,7 @@ public class TopicSubscriber {
         // the main thread blocks at the next statement until a message received
         latch.await();
 
+        connection.stop();
         // Close everything in the order reversed from the opening order
         // NOTE: as the interfaces below extend AutoCloseable,
         // with them it's possible to use the "try-with-resources" Java statement
@@ -112,10 +114,10 @@ public class TopicSubscriber {
     }
 
     public static void main(String... args) throws Exception, JMSException, NamingException {
-        if (args.length < 1) {
-            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
-            System.exit(-1);
-        }
-        new TopicSubscriber().run(args);
+        // if (args.length < 1) {
+        // System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
+        // System.exit(-1);
+        // }
+        new TopicSubscriber().run("192.168.133.8:55555");
     }
 }
