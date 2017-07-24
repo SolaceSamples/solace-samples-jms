@@ -72,7 +72,7 @@ public class BasicReplier {
         Connection connection = connectionFactory.createConnection();
 
         // Create a non-transacted, auto ACK session.
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
         System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
                 SOLACE_USERNAME);
@@ -84,7 +84,7 @@ public class BasicReplier {
         MessageConsumer requestConsumer = session.createConsumer(requestTopic);
 
         // Create the message producer for the reply queue
-        MessageProducer replyProducer = session.createProducer(null);
+        final MessageProducer replyProducer = session.createProducer(null);
 
         // Use the anonymous inner class for receiving request messages asynchronously
         requestConsumer.setMessageListener(new MessageListener() {

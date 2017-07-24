@@ -157,7 +157,7 @@ Just as with previous tutorials, you still need to connect a JMS Connection and 
 final String REQUEST_TOPIC_NAME = "T/GettingStarted/requests";
 Topic requestTopic = session.createTopic(REQUEST_TOPIC_NAME);
 MessageConsumer requestConsumer = session.createConsumer(requestTopic);
-MessageProducer replyProducer = session.createProducer(null);
+final MessageProducer replyProducer = session.createProducer(null);
 ```
 
 Then you simply have to modify the `onMessage()` method of the `MessageConsumer` from the publish/subscribe tutorial to inspect incoming messages and generate appropriate replies.
