@@ -124,10 +124,10 @@ public class QueueConsumer {
     }
 
     public static void main(String... args) throws Exception {
-        // if (args.length < 1) {
-        // System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
-        // System.exit(-1);
-        // }
-        new QueueConsumer().run("192.168.133.8:55555");
+        if (args.length < 1) {
+            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new QueueConsumer().run(args);
     }
 }

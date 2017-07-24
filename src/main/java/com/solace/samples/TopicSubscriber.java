@@ -33,8 +33,6 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.naming.NamingException;
-
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 
@@ -113,11 +111,11 @@ public class TopicSubscriber {
         connection.close();
     }
 
-    public static void main(String... args) throws Exception, JMSException, NamingException {
-        // if (args.length < 1) {
-        // System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
-        // System.exit(-1);
-        // }
-        new TopicSubscriber().run("192.168.133.8:55555");
+    public static void main(String... args) throws Exception {
+        if (args.length < 1) {
+            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new TopicSubscriber().run(args);
     }
 }

@@ -110,10 +110,10 @@ public class QueueProducerJNDI {
     }
 
     public static void main(String... args) throws Exception {
-        // if (args.length < 1) {
-        // System.out.println("Usage: QueueProducer <msg_backbone_ip:port>");
-        // System.exit(-1);
-        // }
-        new QueueProducerJNDI().run("192.168.133.8:55555");
+        if (args.length < 1) {
+            System.out.println("Usage: QueueProducerJNDI <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new QueueProducerJNDI().run(args);
     }
 }

@@ -94,10 +94,10 @@ public class TopicPublisher {
     }
 
     public static void main(String... args) throws Exception {
-        // if (args.length < 1) {
-        // System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
-        // System.exit(-1);
-        // }
-        new TopicPublisher().run("192.168.133.8:55555");
+        if (args.length < 1) {
+            System.out.println("Usage: TopicPublisher <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new TopicPublisher().run(args);
     }
 }

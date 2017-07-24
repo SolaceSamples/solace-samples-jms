@@ -99,7 +99,7 @@ public class BasicRequestor {
         System.out.printf("Sending request '%s' to topic '%s'...%n", request.getText(), requestTopic.toString());
 
         // Send the request
-        requestProducer.send(request, DeliveryMode.NON_PERSISTENT, 
+        requestProducer.send(request, DeliveryMode.NON_PERSISTENT,
                 Message.DEFAULT_PRIORITY,
                 Message.DEFAULT_TIME_TO_LIVE);
 
@@ -143,10 +143,10 @@ public class BasicRequestor {
     }
 
     public static void main(String... args) throws Exception {
-        // if (args.length < 1) {
-        // System.out.println("Usage: BasicRequestor <msg_backbone_ip:port>");
-        // System.exit(-1);
-        // }
-        new BasicRequestor().run("192.168.133.8:55555");
+        if (args.length < 1) {
+            System.out.println("Usage: BasicRequestor <msg_backbone_ip:port>");
+            System.exit(-1);
+        }
+        new BasicRequestor().run(args);
     }
 }
