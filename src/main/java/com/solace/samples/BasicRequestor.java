@@ -115,7 +115,7 @@ public class BasicRequestor {
                 System.out.println(
                         "Received a reply message with no correlationID. This field is needed for a direct request.");
             } else {
-                if (!reply.getJMSCorrelationID().equals(correlationId)) {
+                if (!reply.getJMSCorrelationID().replaceAll("ID:", "").equals(correlationId)) {
                     System.out.println("Received invalid correlationID in reply message.");
                 } else {
                     if (reply instanceof TextMessage) {
