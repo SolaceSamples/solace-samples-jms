@@ -43,7 +43,7 @@ import javax.naming.InitialContext;
  */
 public class QueueProducerJNDI {
 
-    final String SOLACE_VPN = "test";
+    final String SOLACE_VPN = "default";
     final String SOLACE_USERNAME = "clientUsername";
     final String SOLACE_PASSWORD = "password";
 
