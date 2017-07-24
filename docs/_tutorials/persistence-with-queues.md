@@ -120,7 +120,7 @@ To send a message, you must still create a message. The difference from sending 
 
 ```java
 TextMessage message = session.createTextMessage("Hello world Queues!");
-messageProducer.send(message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+messageProducer.send(queue, message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 ```
 
 At this point the producer has sent a message to the Solace message router and it will be waiting for your consumer on the queue.

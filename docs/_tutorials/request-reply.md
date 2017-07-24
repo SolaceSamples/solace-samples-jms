@@ -133,7 +133,7 @@ Finally send the request and wait for the response. This example demonstrates a 
 
 ```java
 final int REPLY_TIMEOUT_MS = 10000; // 10 seconds
-requestProducer.send(request, DeliveryMode.NON_PERSISTENT, 
+requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT, 
         Message.DEFAULT_PRIORITY,
         Message.DEFAULT_TIME_TO_LIVE);
 Message reply = replyConsumer.receive(REPLY_TIMEOUT_MS);

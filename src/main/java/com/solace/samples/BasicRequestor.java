@@ -99,7 +99,7 @@ public class BasicRequestor {
         System.out.printf("Sending request '%s' to topic '%s'...%n", request.getText(), requestTopic.toString());
 
         // Send the request
-        requestProducer.send(request, DeliveryMode.NON_PERSISTENT,
+        requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT,
                 Message.DEFAULT_PRIORITY,
                 Message.DEFAULT_TIME_TO_LIVE);
 

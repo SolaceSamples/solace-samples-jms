@@ -226,7 +226,6 @@ In JMS, a message producer is required for sending messages to a Solace message 
 final String TOPIC_NAME = "T/GettingStarted/pubsub";
 
 Topic topic = session.createTopic(TOPIC_NAME);
-
 MessageProducer messageProducer = session.createProducer(topic);
 ```
 
@@ -238,7 +237,7 @@ To send a message, first create a message from the JMS `Session`. Then use the M
 
 ```java
 TextMessage message = session.createTextMessage("Hello world!");
-messageProducer.send(message, DeliveryMode.NON_PERSISTENT,
+messageProducer.send(topic, message, DeliveryMode.NON_PERSISTENT,
         Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 ```
 

@@ -80,7 +80,7 @@ public class TopicPublisher {
 
         // Send the message
         // NOTE: JMS Message Priority is not supported by the Solace Message Bus
-        messageProducer.send(message, DeliveryMode.NON_PERSISTENT,
+        messageProducer.send(topic, message, DeliveryMode.NON_PERSISTENT,
                 Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
         System.out.println("Sent successfully. Exiting...");
 
