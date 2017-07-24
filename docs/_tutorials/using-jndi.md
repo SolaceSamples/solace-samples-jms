@@ -157,8 +157,7 @@ String solaceHost = args[0];
 Hashtable<String, Object> env = new Hashtable<String, Object>();
 env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
 env.put(InitialContext.PROVIDER_URL, solaceHost);
-env.put(SupportedProperty.SOLACE_JMS_VPN, SOLACE_VPN);
-env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME);
+env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN);
 env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
 
 InitialContext initialContext = new InitialContext(env);

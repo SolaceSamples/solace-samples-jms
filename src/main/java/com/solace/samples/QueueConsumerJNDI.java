@@ -39,7 +39,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import com.solacesystems.jms.SolJmsUtility;
-import com.solacesystems.jms.SupportedProperty;
 
 /**
  * Receives a persistent message from a queue using Solace JMS API implementation. Connection to the Solace message
@@ -49,7 +48,7 @@ import com.solacesystems.jms.SupportedProperty;
  */
 public class QueueConsumerJNDI {
 
-    final String SOLACE_VPN = "default";
+    final String SOLACE_VPN = "test";
     final String SOLACE_USERNAME = "clientUsername";
     final String SOLACE_PASSWORD = "password";
 
@@ -70,8 +69,7 @@ public class QueueConsumerJNDI {
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
         // assign Solace message router connection parameters
         env.put(InitialContext.PROVIDER_URL, solaceHost);
-        env.put(SupportedProperty.SOLACE_JMS_VPN, SOLACE_VPN);
-        env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME);
+        env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN); // Formatted as user@message-vpn
         env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
 
         // Create the initial context that will be used to lookup the JMS Administered Objects.
