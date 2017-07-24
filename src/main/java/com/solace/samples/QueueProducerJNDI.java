@@ -59,6 +59,7 @@ public class QueueProducerJNDI {
         Hashtable<String, Object> env = new Hashtable<String, Object>();
         // use the Solace JNDI initial context factory
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
+
         // assign Solace message router connection parameters
         env.put(InitialContext.PROVIDER_URL, solaceHost);
         env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN); // Formatted as user@message-vpn
