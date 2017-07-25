@@ -214,7 +214,7 @@ Next, the 'ConnectionFactory' can be used the same way as described in the Persi
 
 ```java
 Connection connection = connectionFactory.createConnection();
-final Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+final Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 ```
 
 ## Step 3: Obtaining JMS Destination objects using JNDI
@@ -228,7 +228,7 @@ final String QUEUE_NAME = "Q/tutorial";
 final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
 Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
 ```
-
+SupportedProperty.SOL_CLIENT_ACKNOWLEDGE
 In contrast to the Persistence with Queues tutorial, the physical queue resource name `Q/tutorial` is not used here directly; it has been associated with `/JNDI/Q/tutorial` when the JNDI reference was created by the CLI script. Also note that same CLI script has already administratively created the physical queue object behind  `Q/tutorial` and the `Dynamic Durables` JMS Property does not need to be enabled to automatically create it.
 
 ### Sending and Receiving messages to a queue

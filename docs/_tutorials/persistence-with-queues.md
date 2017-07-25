@@ -134,7 +134,7 @@ Now it is time to receive the messages sent to your queue.
 You still need a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to the Solace message router queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Documentation – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
 ```java
-Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE));
 ```
 
 Then your `MessageConsumer` can remain the same as before, only add a call to `message.acknowledge()` once you’re done processing the message.

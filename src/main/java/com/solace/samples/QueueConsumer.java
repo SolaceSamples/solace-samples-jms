@@ -36,6 +36,7 @@ import javax.jms.TextMessage;
 
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
+import com.solacesystems.jms.SupportedProperty;
 
 /**
  * Receives a persistent message from a queue using Solace JMS API implementation.
@@ -72,7 +73,7 @@ public class QueueConsumer {
         Connection connection = connectionFactory.createConnection();
 
         // Create a non-transacted, client ACK session.
-        Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+        Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
         System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
                 SOLACE_USERNAME);
@@ -96,7 +97,7 @@ public class QueueConsumer {
                     }
                     System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(message));
 
-                    // ACK the received message manually because of the set Session.CLIENT_ACKNOWLEDGE above
+                    // ACK the received message manually because of the set SupportedProperty.SOL_CLIENT_ACKNOWLEDGE above
                     message.acknowledge();
 
                     latch.countDown(); // unblock the main thread
