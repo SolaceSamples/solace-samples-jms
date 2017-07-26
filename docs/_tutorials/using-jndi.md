@@ -147,14 +147,21 @@ To learn how to use the SEMP API, refer to the [Solace Element Management Protoc
 In order to send or receive messages, an application must connect to the Solace message router using a `ConnectionFactory`. The following code shows how to obtain a `ConnectionFactory` JMS object using Solace JNDI.
 
 ```java
+final String SOLACE_VPN = "default";
+final String SOLACE_USERNAME = "clientUsername";
+final String SOLACE_PASSWORD = "password";
+final String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
+
+String solaceHost = args[0];
+
 Hashtable<String, Object> env = new Hashtable<String, Object>();
 env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-env.put(InitialContext.PROVIDER_URL, (String)args[0]);
-env.put(Context.SECURITY_PRINCIPAL, "clientUsername@default");    // Formatted as user@message-vpn
-env.put(Context.SECURITY_CREDENTIALS, "password");
+env.put(InitialContext.PROVIDER_URL, solaceHost);
+env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN);
+env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
 
 InitialContext initialContext = new InitialContext(env);
-SolConnectionFactory cf = (SolConnectionFactory)initialContext.lookup("/JNDI/CF/GettingStarted");
+ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup(CONNECTION_FACTORY_JNDI_NAME);
 ```
 
 ### JMS Properties
@@ -172,25 +179,25 @@ JMS Properties can be passed to the API in several ways, allowing flexibility to
 Following example used above shows the configuration of the JNDI connection runtime with the Username through Initial Context:
 
 ```java
-env.put(Context.SECURITY_PRINCIPAL, "clientUsername");
+env.put(Context.SECURITY_PRINCIPAL, "my-username");
 ```
 
 The created ConnectionFactory will inherit this, but it could be overridden using the created SolConnectionFactory object, allowing for a different username to be used for the data connection:
 
 ```java
-cf.setUsername("username");
+connectionFactory.setUsername("my-username");
 ```
 
 Same could have been predefined as a JVM level System property and used as default if it was not provided by the above two options:
 
 ```
--Djava.naming.security.principal=user1
+-Djava.naming.security.principal=my-username
 ```
 
 Or it could have also been taken as preset default from a `jndi.properties` file on the CLASSPATH, which has following line included:
 
 ```
-java.naming.security.principal=user2
+java.naming.security.principal=my-username
 ```
 
 Some JMS properties can even be configured on the Solace message router and the API will use this setting as a default, for example when the JNDI connection factory Delivery Mode property was set by the CLI script:
@@ -206,8 +213,8 @@ The [Solace JMS Documentation - JMS Properties Reference]({{site.docs-jms-proper
 Next, the 'ConnectionFactory' can be used the same way as described in the Persistence with Queues tutorial to create a JMS Connection, at which point your client is connected to the Solace message router and can create a JMS Session.
 
 ```java
-Connection connection = cf.createConnection();
-final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Connection connection = connectionFactory.createConnection();
+final Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 ```
 
 ## Step 3: Obtaining JMS Destination objects using JNDI
@@ -217,7 +224,9 @@ A Queue or Topic destination is needed to send and receive messages. When using 
 Following code will obtain a Queue for the Persistence with Queues scenario:
 
 ```java
-Queue queue = (Queue)initialContext.lookup("/JNDI/Q/tutorial");
+final String QUEUE_NAME = "Q/tutorial";
+final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
+Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
 ```
 
 In contrast to the Persistence with Queues tutorial, the physical queue resource name `Q/tutorial` is not used here directly; it has been associated with `/JNDI/Q/tutorial` when the JNDI reference was created by the CLI script. Also note that same CLI script has already administratively created the physical queue object behind  `Q/tutorial` and the `Dynamic Durables` JMS Property does not need to be enabled to automatically create it.

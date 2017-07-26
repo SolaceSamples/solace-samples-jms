@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,9 +17,14 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: BasicReplier
+ */
+
 package com.solace.samples;
 
-import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -31,103 +36,115 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 import com.solacesystems.jms.SupportedProperty;
 
+/**
+ * Receives a request message using Solace JMS API implementation and replies to it.
+ * 
+ * This is the Replier in the Request/Reply messaging pattern.
+ */
 public class BasicReplier {
 
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
+
+    final String REQUEST_TOPIC_NAME = "T/GettingStarted/requests";
+
+    // Latch used for synchronizing between threads
+    final CountDownLatch latch = new CountDownLatch(1);
+
     public void run(String... args) throws Exception {
-        System.out.println("BasicReplier initializing...");
+        String solaceHost = args[0];
+        System.out.printf("BasicReplier is connecting to Solace router %s...%n", solaceHost);
 
         // Programmatically create the connection factory using default settings
-        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
-        cf.setHost((String) args[0]);
-        cf.setVPN("default");
-        cf.setUsername("clientUsername");
-        cf.setPassword("password");
-        
-        // JMS Connection
-        Connection connection = cf.createConnection();
+        SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
+        connectionFactory.setHost(solaceHost);
+        connectionFactory.setVPN(SOLACE_VPN);
+        connectionFactory.setUsername(SOLACE_USERNAME);
+        connectionFactory.setPassword(SOLACE_PASSWORD);
 
-        // Create a non-transacted, Auto Ack session.
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
+
+        // Create a non-transacted, auto ACK session.
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        // Create the topic programmatically
-        final Topic topic = session.createTopic("T/GettingStarted/requests");
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
 
-        final MessageProducer producer = session.createProducer(topic);
+        // Create the request topic programmatically
+        Topic requestTopic = session.createTopic(REQUEST_TOPIC_NAME);
 
-        final MessageConsumer consumer = session.createConsumer(topic);
+        // Create the message consumer for the request topic
+        MessageConsumer requestConsumer = session.createConsumer(requestTopic);
 
-        /** Anonymous inner-class for request handling **/
-        consumer.setMessageListener(new MessageListener() {
+        // Create the message producer for the reply queue
+        final MessageProducer replyProducer = session.createProducer(null);
 
+        // Use the anonymous inner class for receiving request messages asynchronously
+        requestConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message request) {
-
-                Destination replyDestination;
                 try {
-                    replyDestination = request.getJMSReplyTo();
-
+                    Destination replyDestination = request.getJMSReplyTo();
                     if (replyDestination != null) {
-                        System.out.println("Received request, generating response");
-                        TextMessage reply = session.createTextMessage();
+                        System.out.println("Received request, responding...");
 
-                        final String text = "Sample response";
+                        TextMessage reply = session.createTextMessage();
+                        String text = "Sample response";
                         reply.setText(text);
 
                         // Copy the correlation ID from the request to the reply
                         reply.setJMSCorrelationID(request.getJMSCorrelationID());
 
-                        // For direct messaging only, this flag is needed to
-                        // interoperate with
+                        // For direct messaging only, this flag is needed to interoperate with
                         // Solace Java, C, and C# request reply APIs.
                         reply.setBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE, Boolean.TRUE);
 
-                        // Leaving priority and Time to Live to their defaults.
-                        // NOTE: Priority is not supported by the Solace Message
-                        // Routers
-                        producer.send(replyDestination, reply, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY,
+                        // Sent the reply
+                        replyProducer.send(replyDestination, reply, DeliveryMode.NON_PERSISTENT,
+                                Message.DEFAULT_PRIORITY,
                                 Message.DEFAULT_TIME_TO_LIVE);
+                        System.out.println("Responded successfully. Exiting...");
 
+                        latch.countDown(); // unblock the main thread
                     } else {
-                        System.out.println("Received message without reply-to field");
+                        System.out.println("Received message without reply-to field.");
                     }
-                } catch (JMSException e) {
+                } catch (JMSException ex) {
                     System.out.println("Error processing incoming message.");
-                    e.printStackTrace();
+                    ex.printStackTrace();
                 }
-
             }
         });
-        ;
 
         // Start receiving messages
         connection.start();
+        System.out.println("Awaiting request...");
+        // the main thread blocks at the next statement until a message received
+        latch.await();
 
-        // Consume-only session is now hooked up and running!
-        System.out.println("Listening for request messages on topic " + topic + " ... Press enter to exit");
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Close consumer
+        connection.stop();
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        replyProducer.close();
+        requestConsumer.close();
+        session.close();
         connection.close();
-        System.out.println("Exiting.");
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
         if (args.length < 1) {
             System.out.println("Usage: BasicReplier <msg_backbone_ip:port>");
             System.exit(-1);
         }
-
-        BasicReplier app = new BasicReplier();
-        app.run(args);
+        new BasicReplier().run(args);
     }
 }

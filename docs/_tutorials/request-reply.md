@@ -75,7 +75,7 @@ compile("com.solacesystems:sol-jms:10.+")
 <dependency>
   <groupId>com.solacesystems</groupId>
   <artifactId>sol-jms</artifactId>
-  <version>10.+</version>
+  <version>[10,)</version>
 </dependency>
 ```
 
@@ -111,18 +111,17 @@ In order to be able to receive the response message back from the Replier, the R
 
 ```java
 TemporaryQueue replyToQueue = session.createTemporaryQueue();
-final MessageConsumer consumer = session.createConsumer(replyToQueue);
+MessageConsumer replyConsumer = session.createConsumer(replyToQueue);
 connection.start();
 ```
 
 With the connection started, now the Requestor is ready to receive any reply messages on its temporary JMS Queue. Next you must create a message and the topic to send the message to. This is done in the same way as illustrated in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
 
 ```java
-final Topic requestDestination = session.createTopic("T/GettingStarted/requests");
-TextMessage request = session.createTextMessage();
-final String text = "Sample Request";
-request.setText(text);
-
+final String REQUEST_TOPIC_NAME = "T/GettingStarted/requests";
+Topic requestTopic = session.createTopic(REQUEST_TOPIC_NAME);
+MessageProducer requestProducer = session.createProducer(requestTopic);
+TextMessage request = session.createTextMessage("Sample Request");
 request.setJMSReplyTo(replyToQueue);
 String correlationId = UUID.randomUUID().toString();
 request.setJMSCorrelationID(correlationId);
@@ -133,17 +132,14 @@ The difference in the above versus the publish/subscribe tutorial is that now yo
 Finally send the request and wait for the response. This example demonstrates a blocking call where the method will wait for the response message to be received.
 
 ```java
-final int timeoutMs = 10000;
-producer.send(requestDestination,
-              request,
-              DeliveryMode.NON_PERSISTENT,
-              Message.DEFAULT_PRIORITY,
-              Message.DEFAULT_TIME_TO_LIVE);
-Message reply = consumer.receive(timeoutMs);
+final int REPLY_TIMEOUT_MS = 10000; // 10 seconds
+requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT, 
+        Message.DEFAULT_PRIORITY,
+        Message.DEFAULT_TIME_TO_LIVE);
+Message reply = replyConsumer.receive(REPLY_TIMEOUT_MS);
 
 if (reply == null) {
-    System.out.println("Failed to receive a reply in " + timeoutMs + " msecs");
-    return;
+    System.out.println("Failed to receive a reply in " + REPLY_TIMEOUT_MS + " msecs");
 }
 ```
 
@@ -158,41 +154,40 @@ Now it is time to receive the request and generate an appropriate reply.
 Just as with previous tutorials, you still need to connect a JMS Connection and Session and create a MessageConsumer to receive request messages. However, in order to send replies back to the requestor, you will also need a MessageProducer. The following code will create the producer and consumer that is required.
 
 ```java
-final Topic topic = session.createTopic("T/GettingStarted/requests");
-final MessageProducer producer = session.createProducer(topic);
-final MessageConsumer consumer = session.createConsumer(topic);
+final String REQUEST_TOPIC_NAME = "T/GettingStarted/requests";
+Topic requestTopic = session.createTopic(REQUEST_TOPIC_NAME);
+MessageConsumer requestConsumer = session.createConsumer(requestTopic);
+final MessageProducer replyProducer = session.createProducer(null);
 ```
 
-Then you simply have to modify the `onReceive()` method of the `MessageConsumer` from the publish/subscribe tutorial to inspect incoming messages and generate appropriate replies.
+Then you simply have to modify the `onMessage()` method of the `MessageConsumer` from the publish/subscribe tutorial to inspect incoming messages and generate appropriate replies.
 
 For example, the following code will send a response to all messages that have a reply-to field. It will copy over any `JMSCorrelationID` found in the incoming messages. It will also set a Solace specific boolean field indicating this message is a reply message. This is a Solace extension to enable JMS applications to exchange requests and replies easily with applications using other Solace APIs.
 
 ```java
 public void onMessage(Message request) {
-    Destination replyDestination;
     try {
-        replyDestination = request.getJMSReplyTo();
+        Destination replyDestination = request.getJMSReplyTo();
         if (replyDestination != null) {
+
             TextMessage reply = session.createTextMessage();
-            final String text = "Sample response";
+            String text = "Sample response";
             reply.setText(text);
             reply.setJMSCorrelationID(request.getJMSCorrelationID());
-             reply.setBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE,
+            reply.setBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE, Boolean.TRUE);
 
-                         Boolean.TRUE);
+            replyProducer.send(replyDestination, reply, DeliveryMode.NON_PERSISTENT,
+                    Message.DEFAULT_PRIORITY,
+                    Message.DEFAULT_TIME_TO_LIVE);
 
-            producer.send(replyDestination,
-                          reply,
-                          DeliveryMode.NON_PERSISTENT,
-                          Message.DEFAULT_PRIORITY,
-                          Message.DEFAULT_TIME_TO_LIVE);
-            }
-
-    } catch (JMSException e) {
+            latch.countDown(); // unblock the main thread
+        } else {
+            System.out.println("Received message without reply-to field.");
+        }
+    } catch (JMSException ex) {
         System.out.println("Error processing incoming message.");
-        e.printStackTrace();
+        ex.printStackTrace();
     }
-
 }
 ```
 
@@ -202,24 +197,25 @@ All that’s left is to receive and process the reply message as it is received 
 
 ```java
 if (reply.getJMSCorrelationID() == null) {
-    throw new Exception("Received a reply message with no correlationID. This field is needed for a direct request.");
+    throw new Exception(
+            "Received a reply message with no correlationID. This field is needed for a direct request.");
 }
 
-//The reply's correlationID should match the request's correlationID
-if (!reply.getJMSCorrelationID().equals(correlationId)) {
+// Apache Qpid JMS prefixes correlation ID with string "ID:" so remove such prefix for interoperability
+if (!reply.getJMSCorrelationID().replaceAll("ID:", "").equals(correlationId)) {
     throw new Exception("Received invalid correlationID in reply message.");
 }
 
 if (reply instanceof TextMessage) {
-    System.out.printf("TextMessage response received: '%s'%n",
-        ((TextMessage)reply).getText());
-    if     (!reply.getBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE)) {
-
+    System.out.printf("TextMessage response received: '%s'%n", ((TextMessage) reply).getText());
+    if (!reply.getBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE)) {
         System.out.println("Warning: Received a reply message without the isReplyMsg flag set.");
     }
+} else {
+    System.out.println("Message response received.");
 }
 
-System.out.printf("Response Message Dump:%n%s%n",SolJmsUtility.dumpMessage(reply));
+System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(reply));
 ```
 
 ## Summarizing

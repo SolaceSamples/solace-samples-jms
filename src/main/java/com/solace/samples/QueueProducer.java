@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,73 +17,93 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: QueueProducer
+ */
+
 package com.solace.samples;
 
+import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 
+/**
+ * Sends a persistent message to a queue using Solace JMS API implementation.
+ * 
+ * The queue used for messages is created on the message broker.
+ */
 public class QueueProducer {
 
-    public void run(String... args) throws Exception {
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
 
-        System.out.println("QueueProducer initializing...");
+    final String QUEUE_NAME = "Q/tutorial";
+
+    public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("QueueProducer is connecting to Solace router %s...%n", solaceHost);
 
         // Programmatically create the connection factory using default settings
-        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
-        cf.setHost((String) args[0]);
-        // use default message-VPN unless specified
-        cf.setVPN(args.length > 1 && args[1] != null ? args[1] : "default");
-        cf.setUsername("clientUsername");
-        cf.setPassword("password");
- 
+        SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
+        connectionFactory.setHost(solaceHost);
+        connectionFactory.setVPN(SOLACE_VPN);
+        connectionFactory.setUsername(SOLACE_USERNAME);
+        connectionFactory.setPassword(SOLACE_PASSWORD);
+
         // Enables persistent queues or topic endpoints to be created dynamically
         // on the router, used when Session.createQueue() is called below
-        cf.setDynamicDurables(true);
+        connectionFactory.setDynamicDurables(true);
 
-        // JMS Connection
-        QueueConnection connection = cf.createQueueConnection();
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
 
-        // Create a non-transacted, Auto Ack session.
-        Session session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+        // Create a non-transacted, auto ACK session.
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
 
         // Create the queue programmatically and the corresponding router resource
         // will also be created dynamically because DynamicDurables is enabled.
-        Queue queue = session.createQueue("Q/tutorial");
+        Queue queue = session.createQueue(QUEUE_NAME);
 
-        // From the session, create a producer for the destination.
-        // Use the default delivery mode as set in the connection factory
-        MessageProducer producer = session.createProducer(queue);
+        // Create the message producer for the created queue
+        MessageProducer messageProducer = session.createProducer(queue);
 
         // Create a text message.
         TextMessage message = session.createTextMessage("Hello world Queues!");
 
-        System.out.printf("Connected. About to send message '%s' to queue '%s'...%n", message.getText(),
-                queue.toString());
+        System.out.printf("Sending message '%s' to queue '%s'...%n", message.getText(), queue.toString());
 
-        producer.send(queue, message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+        // Send the message
+        // NOTE: JMS Message Priority is not supported by the Solace Message Bus
+        messageProducer.send(queue, message, DeliveryMode.PERSISTENT, Message.DEFAULT_PRIORITY,
+                Message.DEFAULT_TIME_TO_LIVE);
 
-        System.out.println("Message sent. Exiting.");
+        System.out.println("Sent successfully. Exiting...");
 
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        messageProducer.close();
+        session.close();
         connection.close();
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
         if (args.length < 1) {
-            System.out.println("Usage: QueueProducer <msg_backbone_ip:port> " +
-            		"[<message-vpn>]");
+            System.out.println("Usage: QueueProducer <msg_backbone_ip:port>");
             System.exit(-1);
         }
-
-        QueueProducer app = new QueueProducer();
-        app.run(args);
+        new QueueProducer().run(args);
     }
 }

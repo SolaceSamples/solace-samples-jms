@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,18 +17,22 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: QueueConsumerJNDI
+ */
+
 package com.solace.samples;
 
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
@@ -37,91 +41,105 @@ import javax.naming.InitialContext;
 import com.solacesystems.jms.SolJmsUtility;
 import com.solacesystems.jms.SupportedProperty;
 
+/**
+ * Receives a persistent message from a queue using Solace JMS API implementation. Connection to the Solace message
+ * router is setup using JNDI.
+ *
+ * The queue used for messages must exist on the message broker.
+ */
 public class QueueConsumerJNDI {
 
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
+
+    final String QUEUE_NAME = "Q/tutorial";
+    final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
+    final String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
+
+    // Latch used for synchronizing between threads
+    final CountDownLatch latch = new CountDownLatch(1);
+
     public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("QueueConsumerJNDI is connecting to Solace router %s...%n", solaceHost);
 
-        System.out.println("QueueConsumer initializing...");
-
-        // The client needs to specify both of the following properties:
+        // setup environment variables for creating of the initial context
         Hashtable<String, Object> env = new Hashtable<String, Object>();
+        // use the Solace JNDI initial context factory
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-        env.put(InitialContext.PROVIDER_URL, (String) args[0]);
-        env.put(Context.SECURITY_PRINCIPAL, "clientUsername@default");    // Formatted as user@message-vpn
-        env.put(Context.SECURITY_CREDENTIALS, "password");
+  
+        // assign Solace message router connection parameters
+        env.put(InitialContext.PROVIDER_URL, solaceHost);
+        env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN); // Formatted as user@message-vpn
+        env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
 
-        // InitialContext is used to lookup the JMS administered objects.
+        // Create the initial context that will be used to lookup the JMS Administered Objects.
         InitialContext initialContext = new InitialContext(env);
-        // Lookup ConnectionFactory.
-        QueueConnectionFactory cf = (QueueConnectionFactory) initialContext.lookup("/JNDI/CF/GettingStarted");
-        // JMS Connection
-        QueueConnection connection = cf.createQueueConnection();
+        // Lookup the connection factory
+        ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup(CONNECTION_FACTORY_JNDI_NAME);
 
-        // Create a non-transacted, Client Ack session.
-        Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
 
-        // Lookup Queue.
-        Queue queue = (Queue) initialContext.lookup("/JNDI/Q/tutorial");
+        // Create a non-transacted, client ACK session.
+        Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
-        // Latch used for synchronizing b/w threads
-        final CountDownLatch latch = new CountDownLatch(1);
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
+
+        // Lookup the queue.
+        Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
 
         // From the session, create a consumer for the destination.
-        MessageConsumer consumer = session.createConsumer(queue);
+        MessageConsumer messageConsumer = session.createConsumer(queue);
 
-        /** Anonymous inner-class for receiving messages **/
-        consumer.setMessageListener(new MessageListener() {
-
+        // Use the anonymous inner class for receiving messages asynchronously
+        messageConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
-
                 try {
                     if (message instanceof TextMessage) {
                         System.out.printf("TextMessage received: '%s'%n", ((TextMessage) message).getText());
                     } else {
                         System.out.println("Message received.");
                     }
-                    System.out.printf("Message Dump:%n%s%n", SolJmsUtility.dumpMessage(message));
+                    System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(message));
 
+                    // ACK the received message manually because of the set SupportedProperty.SOL_CLIENT_ACKNOWLEDGE above
                     message.acknowledge();
 
-                    latch.countDown(); // unblock main thread
-                } catch (JMSException e) {
+                    latch.countDown(); // unblock the main thread
+                } catch (JMSException ex) {
                     System.out.println("Error processing incoming message.");
-                    e.printStackTrace();
+                    ex.printStackTrace();
                 }
-
             }
         });
 
-        // Do not forget to start the JMS Connection.
+        // Start receiving messages
         connection.start();
+        System.out.println("Awaiting message...");
+        // the main thread blocks at the next statement until a message received
+        latch.await();
 
-        // Output a message on the console.
-        System.out.println("Waiting for a message ... (press Ctrl+C) to terminate ");
-
-        try {
-            latch.await(); // block here until message received, and latch will
-                           // flip
-        } catch (InterruptedException e) {
-            System.out.println("I was awoken while waiting");
-        }
-
-        // Close consumer
+        connection.stop();
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        messageConsumer.close();
+        session.close();
         connection.close();
+        // The initial context needs to be close; it does not extend AutoCloseable
         initialContext.close();
-        System.out.println("Exiting.");
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
         if (args.length < 1) {
-            System.out.println("Usage: QueueConsumer <msg_backbone_ip:port>");
+            System.out.println("Usage: QueueConsumerJNDI <msg_backbone_ip:port>");
             System.exit(-1);
         }
-
-        QueueConsumer app = new QueueConsumer();
-        app.run(args);
+        new QueueConsumerJNDI().run(args);
     }
 }

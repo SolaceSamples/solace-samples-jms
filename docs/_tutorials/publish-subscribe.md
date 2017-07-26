@@ -90,7 +90,7 @@ compile("com.solacesystems:sol-jms:10.+")
 <dependency>
   <groupId>com.solacesystems</groupId>
   <artifactId>sol-jms</artifactId>
-  <version>10.+</version>
+  <version>[10,)</version>
 </dependency>
 ```
 
@@ -133,14 +133,20 @@ In order to send or receive messages, an application must connect to the Solace 
 The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
 ```java
-SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
-cf.setHost((String) args[0]);
-cf.setVPN("default");
-cf.setUsername("clientUsername");
-cf.setPassword("password");
+final String SOLACE_VPN = "default";
+final String SOLACE_USERNAME = "clientUsername";
+final String SOLACE_PASSWORD = "password";
 
-Connection connection = cf.createConnection();
-final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+String solaceHost = args[0];
+
+SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
+connectionFactory.setHost(solaceHost);
+connectionFactory.setVPN(SOLACE_VPN);
+connectionFactory.setUsername(SOLACE_USERNAME);
+connectionFactory.setPassword(SOLACE_PASSWORD);
+
+Connection connection = connectionFactory.createConnection();
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 ```
 
 This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Documentation - Managing Sessions]({{ site.docs-jms-managing-sessions }}){:target="_top"}.
@@ -160,39 +166,38 @@ First a `Topic` object is required. Here we create a topic from the JMS Session 
 Then create the `MessageConsumer` using the JMS `Session`.
 
 ```java
-final Topic topic = session.createTopic("T/GettingStarted/pubsub");
+final String TOPIC_NAME = "T/GettingStarted/pubsub";
 
-final MessageConsumer consumer = session.createConsumer(topic);
+Topic topic = session.createTopic(TOPIC_NAME);
+
+MessageConsumer messageConsumer = session.createConsumer(topic);
 ```
 
 Next, this sample will set the `MessageListener` callback which converts the message consumer from a blocking consumer into an asynchronous consumer. The message consumer callback code uses a countdown latch in this example to block the consumer thread until a single message has been received.
 
 ```java
-// Latch used for synchronizing b/w threads
 final CountDownLatch latch = new CountDownLatch(1);
 
-/** Anonymous inner-class for receiving messages **/
-consumer.setMessageListener(new MessageListener() {
-
-    @Override
-    public void onMessage(Message message) {
-
-        try {
-            if (message instanceof TextMessage) {
-                System.out.printf("TextMessage received: '%s'%n",
-                    ((TextMessage)message).getText());
-            } else {
-                System.out.println("Message received.");
+public void run(String... args) throws Exception {
+...
+    messageConsumer.setMessageListener(new MessageListener() {
+        @Override
+        public void onMessage(Message message) {
+            try {
+                if (message instanceof TextMessage) {
+                    System.out.printf("TextMessage received: '%s'%n", ((TextMessage) message).getText());
+                } else {
+                    System.out.println("Message received.");
+                }
+                System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(message));
+                latch.countDown(); // unblock the main thread
+            } catch (JMSException ex) {
+                System.out.println("Error processing incoming message.");
+                ex.printStackTrace();
             }
-            System.out.printf("Message Dump:%n%s%n",
-                                SolJmsUtility.dumpMessage(message));
-            latch.countDown(); // unblock main thread
-        } catch (JMSException e) {
-            System.out.println("Error processing incoming message.");
-            e.printStackTrace();
         }
-    }
-});
+    });
+...
 ```
 
 For the purposes of demonstration, the callback will simply receive the message and print its contents to the console before signalling the main thread via the countdown latch.
@@ -202,11 +207,7 @@ Finally, start the connection so that messages will start flowing to the consume
 ```java
 connection.start();
 
-try {
-    latch.await(); // block here until message received, and latch will flip
-} catch (InterruptedException e) {
-    System.out.println("I was awoken while waiting");
-}
+latch.await();
 ```
 
 At this point the consumer is ready to receive messages.
@@ -222,9 +223,10 @@ Now it is time to send a message to the waiting consumer.
 In JMS, a message producer is required for sending messages to a Solace message router.
 
 ```java
-final Topic topic = session.createTopic("T/GettingStarted/pubsub");
+final String TOPIC_NAME = "T/GettingStarted/pubsub";
 
-final MessageProducer producer = session.createProducer(publishDestination);
+Topic topic = session.createTopic(TOPIC_NAME);
+MessageProducer messageProducer = session.createProducer(topic);
 ```
 
 JMS Message Producers are created from the session object and are assigned a default destination on creation.
@@ -235,11 +237,8 @@ To send a message, first create a message from the JMS `Session`. Then use the M
 
 ```java
 TextMessage message = session.createTextMessage("Hello world!");
-producer.send(publishDestination,
-            message,
-            DeliveryMode.NON_PERSISTENT,
-            Message.DEFAULT_PRIORITY,
-            Message.DEFAULT_TIME_TO_LIVE);
+messageProducer.send(topic, message, DeliveryMode.NON_PERSISTENT,
+        Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 ```
 
 At this point the producer has sent a message to the Solace message router and your waiting consumer will have received the message and printed its contents to the screen.
@@ -276,8 +275,9 @@ If you start the `TopicSubscriber` with a single argument for the Solace message
 
 ```
 $ ./build/staged/bin/topicSubscriber <HOST>
-TopicSubscriber initializing...
-Connected. Awaiting message...
+TopicSubscriber is connecting to Solace router <HOST>...
+Connected to Solace Message VPN 'default' with client username 'clientUsername'.
+Awaiting message...
 ```
 
 Note: log4j logs were omitted in the above to remain concise.
@@ -286,31 +286,36 @@ Then you can send a message using the `TopicPublisher` again using a single argu
 
 ```
 $ ./build/staged/bin/topicPublisher <HOST>
-Topic Publisher initializing...
-Connected. About to send message 'Hello world!' to topic 'T/GettingStarted/pubsub'...
-Message sent. Exiting.
+TopicPublisher is connecting to Solace router <HOST>...
+Connected to the Solace Message VPN 'default' with client username 'clientUsername'.
+Sending message 'Hello world!' to topic 'T/GettingStarted/pubsub'...
+Sent successfully. Exiting...
 ```
 
 With the message delivered the subscriber output will look like the following:
 
 ```
 TextMessage received: 'Hello world!'
-Message Dump:
-JMSDeliveryMode:                         1
-JMSDestination:                           Topic 'T/GettingStarted/pubsub'
-JMSExpiration:                           0
-JMSMessageID:                             ID:fe80:0:0:0:211:43ff:fee3:4821%2876815048f6d5d70:0
-JMSPriority:                             0
-JMSTimestamp:                             1444333147767
-JMSProperties:                           {JMS_Solace_isXML:false,JMS_Solace_DeliverToOne:false,JMS_Solace_DeadMsgQueueEligible:false,JMS_Solace_ElidingEligible:false,Solace_JMS_Prop_IS_Reply_Message:false}
-Destination:                             Topic 'T/GettingStarted/pubsub'
-AppMessageID:                             ID:fe80:0:0:0:211:43ff:fee3:4821%2876815048f6d5d70:0
-SendTimestamp:                           1444333147767 (Thu Oct 08 2015 15:39:07)
-Class Of Service:                         USER_COS_1
-DeliveryMode:                             NON_PERSISTENT
-Message Id:                               4
-Binary Attachment:                       len=15
-1c 0f 48 65 6c 6c 6f 20   77 6f 72 6c 64 21 00       ..Hello.world!.
+Message Content:
+JMSDeliveryMode:                        1
+JMSDestination:                         Topic 'T/GettingStarted/pubsub'
+JMSExpiration:                          0
+JMSMessageID:                           ID:fe80:0:0:0:0:5efe:c0a8:4101%net13fbd815d6024960d0:0
+JMSPriority:                            0
+JMSTimestamp:                           1500556596909
+JMSProperties:                          {JMSXUserID:clientUsername,JMS_Solace_isXML:true,JMS_Solace_DeliverToOne:false,JMS_Solace_DeadMsgQueueEligible:false,JMS_Solace_ElidingEligible:false,JMS_Solace_MsgDiscardIndication:false,Solace_JMS_Prop_IS_Reply_Message:false}
+Destination:                            Topic 'T/GettingStarted/pubsub'
+AppMessageID:                           ID:fe80:0:0:0:0:5efe:c0a8:4101%net13fbd815d6024960d0:0
+SendTimestamp:                          1500556596909 (Thu Jul 20 2017 09:16:36)
+Priority:                               0
+Class Of Service:                       USER_COS_1
+DeliveryMode:                           DIRECT
+Message Id:                             4
+User Property Map:                      1 entries
+  Key 'JMSXUserID' (String): clientUsername
+
+XML:                                    len=12
+  48 65 6c 6c 6f 20 77 6f    72 6c 64 21                Hello.world!
 ```
 
 The received message is printed to the screen. The `TextMessage` contents was “Hello world!” as expected and the message dump contains extra information about the Solace message that was received.

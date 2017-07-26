@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,109 +17,118 @@
  * under the License.
  */
 
+/**
+ *  Solace JMS 1.1 Examples: QueueConsumer
+ */
+
 package com.solace.samples;
 
 import java.util.concurrent.CountDownLatch;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 import com.solacesystems.jms.SupportedProperty;
 
+/**
+ * Receives a persistent message from a queue using Solace JMS API implementation.
+ *
+ * The queue used for messages is created on the message broker.
+ */
 public class QueueConsumer {
 
-    public void run(String... args) throws Exception {
+    final String SOLACE_VPN = "default";
+    final String SOLACE_USERNAME = "clientUsername";
+    final String SOLACE_PASSWORD = "password";
 
-        System.out.println("QueueConsumer initializing...");
+    final String QUEUE_NAME = "Q/tutorial";
+
+    // Latch used for synchronizing between threads
+    final CountDownLatch latch = new CountDownLatch(1);
+
+    public void run(String... args) throws Exception {
+        String solaceHost = args[0];
+        System.out.printf("QueueConsumer is connecting to Solace router %s...%n", solaceHost);
 
         // Programmatically create the connection factory using default settings
-        SolConnectionFactory cf = SolJmsUtility.createConnectionFactory();
-        cf.setHost((String) args[0]);
-        // use default message-VPN unless specified
-        cf.setVPN(args.length > 1 && args[1] != null ? args[1] : "default");
-        cf.setUsername("clientUsername");
-        cf.setPassword("password");
- 
+        SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
+        connectionFactory.setHost(solaceHost);
+        connectionFactory.setVPN(SOLACE_VPN);
+        connectionFactory.setUsername(SOLACE_USERNAME);
+        connectionFactory.setPassword(SOLACE_PASSWORD);
+
         // Enables persistent queues or topic endpoints to be created dynamically
         // on the router, used when Session.createQueue() is called below
-        cf.setDynamicDurables(true);
+        connectionFactory.setDynamicDurables(true);
 
-        // JMS Connection
-        QueueConnection connection = cf.createQueueConnection();
+        // Create connection to the Solace router
+        Connection connection = connectionFactory.createConnection();
 
-        // Create a non-transacted, Client Ack session.
-        Session session = connection.createQueueSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
+        // Create a non-transacted, client ACK session.
+        Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
+
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
+                SOLACE_USERNAME);
 
         // Create the queue programmatically and the corresponding router resource
         // will also be created dynamically because DynamicDurables is enabled.
-        Queue queue = session.createQueue("Q/tutorial");
-
-        // Latch used for synchronizing b/w threads
-        final CountDownLatch latch = new CountDownLatch(1);
+        Queue queue = session.createQueue(QUEUE_NAME);
 
         // From the session, create a consumer for the destination.
-        MessageConsumer consumer = session.createConsumer(queue);
+        MessageConsumer messageConsumer = session.createConsumer(queue);
 
-        /** Anonymous inner-class for receiving messages **/
-        consumer.setMessageListener(new MessageListener() {
-
+        // Use the anonymous inner class for receiving messages asynchronously
+        messageConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
-
                 try {
                     if (message instanceof TextMessage) {
                         System.out.printf("TextMessage received: '%s'%n", ((TextMessage) message).getText());
                     } else {
                         System.out.println("Message received.");
                     }
-                    System.out.printf("Message Dump:%n%s%n", SolJmsUtility.dumpMessage(message));
+                    System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(message));
 
+                    // ACK the received message manually because of the set SupportedProperty.SOL_CLIENT_ACKNOWLEDGE above
                     message.acknowledge();
 
-                    latch.countDown(); // unblock main thread
-                } catch (JMSException e) {
+                    latch.countDown(); // unblock the main thread
+                } catch (JMSException ex) {
                     System.out.println("Error processing incoming message.");
-                    e.printStackTrace();
+                    ex.printStackTrace();
                 }
-
             }
         });
 
-        // Do not forget to start the JMS Connection.
+        // Start receiving messages
         connection.start();
+        System.out.println("Awaiting message...");
+        // the main thread blocks at the next statement until a message received
+        latch.await();
 
-        // Output a message on the console.
-        System.out.println("Waiting for a message ... (press Ctrl+C) to terminate ");
-
-        try {
-            latch.await(); // block here until message received, and latch will
-                           // flip
-        } catch (InterruptedException e) {
-            System.out.println("I was awoken while waiting");
-        }
-
-        // Close consumer
+        connection.stop();
+        // Close everything in the order reversed from the opening order
+        // NOTE: as the interfaces below extend AutoCloseable,
+        // with them it's possible to use the "try-with-resources" Java statement
+        // see details at https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+        messageConsumer.close();
+        session.close();
         connection.close();
-        System.out.println("Exiting.");
     }
 
     public static void main(String... args) throws Exception {
-
-        // Check command line arguments
         if (args.length < 1) {
-            System.out.println("Usage: QueueConsumer <msg_backbone_ip:port> " +
-            		"[<message-vpn>]");
+            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
             System.exit(-1);
         }
-
-        QueueConsumer app = new QueueConsumer();
-        app.run(args);
+        new QueueConsumer().run(args);
     }
 }
