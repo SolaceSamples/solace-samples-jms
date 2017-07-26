@@ -197,23 +197,25 @@ All that’s left is to receive and process the reply message as it is received 
 
 ```java
 if (reply.getJMSCorrelationID() == null) {
-    System.out.println(
+    throw new Exception(
             "Received a reply message with no correlationID. This field is needed for a direct request.");
-} else {
-    if (!reply.getJMSCorrelationID().equals(correlationId)) {
-        System.out.println("Received invalid correlationID in reply message.");
-    } else {
-        if (reply instanceof TextMessage) {
-            System.out.printf("TextMessage response received: '%s'%n", ((TextMessage) reply).getText());
-        } else {
-            System.out.println("Message response received.");
-        }
-        if (!reply.getBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE)) {
-            System.out.println("Warning: Received a reply message without the isReplyMsg flag set.");
-        }
-        System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(reply));
-    }
 }
+
+// Apache Qpid JMS prefixes correlation ID with string "ID:" so remove such prefix for interoperability
+if (!reply.getJMSCorrelationID().replaceAll("ID:", "").equals(correlationId)) {
+    throw new Exception("Received invalid correlationID in reply message.");
+}
+
+if (reply instanceof TextMessage) {
+    System.out.printf("TextMessage response received: '%s'%n", ((TextMessage) reply).getText());
+    if (!reply.getBooleanProperty(SupportedProperty.SOLACE_JMS_PROP_IS_REPLY_MESSAGE)) {
+        System.out.println("Warning: Received a reply message without the isReplyMsg flag set.");
+    }
+} else {
+    System.out.println("Message response received.");
+}
+
+System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(reply));
 ```
 
 ## Summarizing

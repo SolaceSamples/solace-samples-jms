@@ -118,6 +118,7 @@ public class BasicRequestor {
                     "Received a reply message with no correlationID. This field is needed for a direct request.");
         }
 
+        // Apache Qpid JMS prefixes correlation ID with string "ID:" so remove such prefix for interoperability
         if (!reply.getJMSCorrelationID().replaceAll("ID:", "").equals(correlationId)) {
             throw new Exception("Received invalid correlationID in reply message.");
         }
