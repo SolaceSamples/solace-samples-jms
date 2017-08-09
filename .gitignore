@@ -13,3 +13,4 @@ _site/
 docs/_site
 /target/
 *.bak
+.idea
