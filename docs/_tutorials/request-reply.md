@@ -2,13 +2,11 @@
 layout: tutorials
 title: Request/Reply
 summary: Learn how to set up request/reply messaging.
-icon: request-reply.png
+icon: I_dev_R+R.svg
 ---
 
 
 This tutorial outlines both roles in the request-response message exchange pattern. It will show you how to act as the client by creating a request, sending it and waiting for the response. It will also show you how to act as the server by receiving incoming requests, creating a reply and sending it back to the client. It builds on the basic concepts introduced in [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
-
-![]({{ site.baseurl }}/images/request-reply.png)
 
 ## Assumptions
 
@@ -81,7 +79,7 @@ compile("com.solacesystems:sol-jms:10.+")
 
 ### Get the API: Using the Solace Developer Portal
 
-The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples. 
+The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 ## Trying it yourself
 
@@ -133,7 +131,7 @@ Finally send the request and wait for the response. This example demonstrates a 
 
 ```java
 final int REPLY_TIMEOUT_MS = 10000; // 10 seconds
-requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT, 
+requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT,
         Message.DEFAULT_PRIORITY,
         Message.DEFAULT_TIME_TO_LIVE);
 Message reply = replyConsumer.receive(REPLY_TIMEOUT_MS);

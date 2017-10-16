@@ -2,12 +2,10 @@
 layout: tutorials
 title: Persistence with Queues
 summary: Learn how to set up persistence for guaranteed delivery.
-icon: persistence-tutorial.png
+icon: I_dev_Persistent.svg
 ---
 
 This tutorial builds on the basic concepts introduced in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe), and will show you how to send and receive persistent messages from a Solace message router queue in a point to point fashion.
-
-![]({{ site.baseurl }}/images/persistence-tutorial.png)
 
 ## Assumptions
 
@@ -68,7 +66,7 @@ compile("com.solacesystems:sol-jms:10.+")
 
 ### Get the API: Using the Solace Developer Portal
 
-The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples. 
+The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 ## Trying it yourself
 
@@ -110,7 +108,7 @@ Because the Dynamic Durables property has been enabled when creating the connect
 
 ## Sending a message to a queue
 
-Now it is time to send a message to the queue. 
+Now it is time to send a message to the queue.
 
 ![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
 
