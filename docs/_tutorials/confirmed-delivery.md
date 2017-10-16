@@ -2,12 +2,10 @@
 layout: tutorials
 title: Confirmed Delivery
 summary: Learn how to confirm that your messages are received by a Solace message router.
-icon: confirmed-delivery.png
+icon: I_dev_confirm.svg
 ---
 
 This tutorial builds on the basic concepts introduced in [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial and will show you how to properly process publisher acknowledgements. Once an acknowledgement for a message has been received and processed, you have confirmed your persistent messages have been properly accepted by the Solace message router and therefore can be guaranteed of no message loss.  
-
-![confirmed-delivery]({{ site.baseurl }}/images/confirmed-delivery.png)
 
 ## Persistent Publishing with JMS version 1.1
 
@@ -22,4 +20,3 @@ Refer to the [JMS specification](http://download.oracle.com/otndocs/jcp/7195-jms
 For a JMS version 1.1 applications there is nothing further they must do to confirm message delivery with the Solace message router. This is handled by the API by making the send call blocking.
 
 If you have any further questions ask the [Solace community]({{ site.links-community }}){:target="_top"}.
-

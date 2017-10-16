@@ -2,12 +2,10 @@
 layout: tutorials
 title: Publish/Subscribe
 summary: Learn how to set up pub/sub messaging on a Solace VMR.
-icon: publish-subscribe.png
+icon: I_dev_P+S.svg
 ---
 
 This tutorial will introduce you to the fundamentals of the JMS 1.1 API as implemented by Solace. The tutorial will exemplify connecting a client, subscribing to a topic and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange illustrated here:
-
-![]({{ site.baseurl }}/images/publish-subscribe.png)
 
 ## Assumptions
 
@@ -96,7 +94,7 @@ compile("com.solacesystems:sol-jms:10.+")
 
 ### Get the API: Using the Solace Developer Portal
 
-The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples. 
+The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 ## Trying it yourself
 
@@ -114,7 +112,7 @@ This tutorial will make use of two JMS administered objects:
 
 The [JMS specification](http://java.sun.com/products/jms/docs.html){:target="_blank"} provides two ways to create administered objects:
 
-*   JNDI Lookup 
+*   JNDI Lookup
 *   Programmatic creation through the JMS API.
 
 This tutorial will use the approach of programmatically creating the required objects. For developers, this is the recommended approach as this enables:
@@ -128,7 +126,7 @@ The programmatic approach is also the convention most often followed with JMS sa
 
 ## Connecting to the Solace message router
 
-In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
+In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers.
 
 The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
@@ -323,5 +321,3 @@ The received message is printed to the screen. The `TextMessage` contents was â€
 You have now successfully connected a client, subscribed to a topic and exchanged messages using this topic.
 
 If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.
-
-

@@ -109,7 +109,7 @@ message-spool message-vpn "default"
     no shutdown
     exit
   exit
-  
+
 ```
 
 *   Properly configure the default message-VPN with the necessary JNDI configuration. This script assumes the JNDI connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below. The script also sets the properties of the JNDI connection factory, which will apply to the connections created when using it. Also notice how the JNDI queue reference is linked to the phisical queue.
@@ -127,7 +127,7 @@ jndi message-vpn "default"
       property "physical-name" "Q/tutorial"
       exit
   exit
-  
+
 ```
 
 To apply this configuration, simply log in to the Solace message router CLI as an `admin` user with the default `admin` password using a Secure Shell (SSH) connection. Then paste the above script fragments into the CLI.
@@ -138,7 +138,7 @@ Solace - Virtual Message Router (VMR)
 Password:
 ```
 
-See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details. 
+See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details.
 
 To learn how to use the SEMP API, refer to the [Solace Element Management Protocol (SEMP) tutorials]({{site.docs-semp-get-started}}){:target="_top"}. To learn about the SolAdmin management application, refer to the [Solace Documentation - SolAdmin Overview]({{site.docs-management-soladmin}}){:target="_top"} and the application's online Help. The application can be [downloaded here]({{ site.links-downloads }}){:target="_top"}.
 
