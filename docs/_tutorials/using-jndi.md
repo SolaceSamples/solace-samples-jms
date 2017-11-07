@@ -142,7 +142,7 @@ jndi message-vpn "default"
 {% if jekyll.environment == 'solaceCloud' %}
 To apply this configuration, simply log in to Solace messaging CLI as an admin user and paste the above script fragments into the CLI.
 
-To obtain your management credentials in Solace Cloud, scroll down to the Management section on the Connectivity tab
+If connecting using Solace Cloud, obtain your management credentials by scrolling down to the Management section on the Connectivity tab
 
 ![]({{ site.baseurl }}/images/management-info.png)
 
@@ -151,15 +151,17 @@ ssh <management-username>@<HOST> -p 2222
 Solace - Virtual Message Router (VMR)
 Password:
 ```
-{% else %}
-To apply this configuration, simply log in to the Solace message router CLI as an `admin` user with the default `admin` password using a Secure Shell (SSH) connection. Then paste the above script fragments into the CLI.
+{% endif %}
+
+ 
+
+If using a VMR load, log in to the Solace message router CLI as an `admin` user with the default `admin` password.
 
 ```
 ssh admin@<HOST>
 Solace - Virtual Message Router (VMR)
 Password:
 ```
-{% endif %}
 
 
 See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details. 
