@@ -48,34 +48,37 @@ import com.solacesystems.jms.SupportedProperty;
  */
 public class BasicReplier {
 
-    final String SOLACE_VPN = "default";
-    final String SOLACE_USERNAME = "clientUsername";
-    final String SOLACE_PASSWORD = "password";
-
     final String REQUEST_TOPIC_NAME = "T/GettingStarted/requests";
 
     // Latch used for synchronizing between threads
     final CountDownLatch latch = new CountDownLatch(1);
 
     public void run(String... args) throws Exception {
-        String solaceHost = args[0];
-        System.out.printf("BasicReplier is connecting to Solace router %s...%n", solaceHost);
+
+        String[] split = args[1].split("@");
+
+        String host = args[0];
+        String vpnName = split[1];
+        String username = split[0];
+        String password = args[2];
+
+        System.out.printf("BasicReplier is connecting to Solace messaging at %s...%n", host);
 
         // Programmatically create the connection factory using default settings
         SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-        connectionFactory.setHost(solaceHost);
-        connectionFactory.setVPN(SOLACE_VPN);
-        connectionFactory.setUsername(SOLACE_USERNAME);
-        connectionFactory.setPassword(SOLACE_PASSWORD);
+        connectionFactory.setHost(host);
+        connectionFactory.setVPN(vpnName);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
 
-        // Create connection to the Solace router
+        // Create connection to Solace messaging
         Connection connection = connectionFactory.createConnection();
 
         // Create a non-transacted, auto ACK session.
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
-                SOLACE_USERNAME);
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", vpnName,
+                username);
 
         // Create the request topic programmatically
         Topic requestTopic = session.createTopic(REQUEST_TOPIC_NAME);
@@ -141,8 +144,19 @@ public class BasicReplier {
     }
 
     public static void main(String... args) throws Exception {
-        if (args.length < 1) {
-            System.out.println("Usage: BasicReplier <msg_backbone_ip:port>");
+        if (args.length != 3 || args[1].split("@").length != 2) {
+            System.out.println("Usage: TopicPublisher <host:port> <client-username@message-vpn> <client-password>");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[0].isEmpty()) {
+            System.out.println("No client-username entered");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[1].isEmpty()) {
+            System.out.println("No message-vpn entered");
+            System.out.println();
             System.exit(-1);
         }
         new BasicReplier().run(args);

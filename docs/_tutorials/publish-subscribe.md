@@ -2,25 +2,30 @@
 layout: tutorials
 title: Publish/Subscribe
 summary: Learn how to set up pub/sub messaging on a Solace VMR.
-icon: publish-subscribe.png
+icon: I_dev_P+S.svg
+links:
+    - label: TopicPublisher.java
+      link: /blob/master/src/main/java/com/solace/samples/TopicPublisher.java
+    - label: TopicSubscriber.java
+      link: /blob/master/src/main/java/com/solace/samples/TopicSubscriber.java
 ---
 
-This tutorial will introduce you to the fundamentals of the JMS 1.1 API as implemented by Solace. The tutorial will exemplify connecting a client, subscribing to a topic and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange illustrated here:
-
-![]({{ site.baseurl }}/images/publish-subscribe.png)
+This tutorial will introduce you to the fundamentals of the JMS 1.1 API as implemented by Solace. The tutorial will exemplify connecting a client, subscribing to a topic and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange.
 
 ## Assumptions
 
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-*   You have access to a running Solace message router with the following configuration:
-    *   Enabled message VPN
-    *   Enabled client username
+*   You have access to Solace messaging with the following configuration details:
+    *   Connectivity information for a Solace message-VPN
+    *   Enabled client username and password
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
-
-The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
+{% if jekyll.environment == 'solaceCloud' %}
+One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging on the [home page]({{ site.baseurl }}/) of these tutorials.
+{% else %}
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
+{% endif %}
 
 ## Goals
 
@@ -37,73 +42,14 @@ JMS is a standard API for sending and receiving messages. As such, in addition t
 2.  [https://en.wikipedia.org/wiki/Java_Message_Service](https://en.wikipedia.org/wiki/Java_Message_Service){:target="_blank"}
 3.  [https://docs.oracle.com/javaee/7/tutorial/partmessaging.htm#GFIRP3](https://docs.oracle.com/javaee/7/tutorial/partmessaging.htm#GFIRP3){:target="_blank"}
 
-The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with your Solace message router.
+The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with Solace messaging.
 
-## Solace message router properties
-
-In order to send or receive messages to a Solace message router, you need to know a few details of how to connect to the Solace message router. Specifically you need to know the following:
-
-<table>
-  <tr>
-    <th>Resource</th>
-    <th>Value</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>Host</td>
-    <td>String of the form <code>smf://DNS_NAME</code> or <code>smf://IP:Port</code></td>
-    <td>This is the address clients use when connecting to the Solace message router to send and receive messages. For a Solace VMR this there is only a single interface so the IP is the same as the management IP address. For Solace message router appliances this is the host address of the message-backbone.</td>
-  </tr>
-  <tr>
-    <td>Message VPN</td>
-    <td>String</td>
-    <td>The Solace message router Message VPN that this client should connect to. The simplest option is to use the “default” message-vpn which is present on all Solace message routers and fully enabled for message traffic on Solace VMRs.</td>
-  </tr>
-  <tr>
-    <td>Client Username</td>
-    <td>String</td>
-    <td>The client username. For the Solace VMR default message VPN, authentication is disabled by default, so this can be any value.</td>
-  </tr>
-  <tr>
-    <td>Client Password</td>
-    <td>String</td>
-    <td>The optional client password. For the Solace VMR default message VPN, authentication is disabled by default, so this can be any value or omitted.</td>
-  </tr>
-</table>
-
-
-For the purposes of this tutorial, you will connect to the default message VPN of a Solace VMR so the only required information to proceed is the Solace VMR host string which this tutorial accepts as an argument.
-
-## Obtaining the Solace API
-
-This tutorial depends on you having the Solace Messaging API for JMS. Here are a few easy ways to get the JMS API. The instructions in the [Building](#building) section assume you're using Gradle and pulling the jars from maven central. If your environment differs then adjust the build instructions appropriately.
-
-### Get the API: Using Gradle
-
-```
-compile("com.solacesystems:sol-jms:10.+")
-```
-
-### Get the API: Using Maven
-
-```
-<dependency>
-  <groupId>com.solacesystems</groupId>
-  <artifactId>sol-jms</artifactId>
-  <version>[10,)</version>
-</dependency>
-```
-
-### Get the API: Using the Solace Developer Portal
-
-The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples. 
-
-## Trying it yourself
-
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
-
-At the end, this tutorial walks through downloading and running the sample from source.
-
+{% if jekyll.environment == 'solaceCloud' %}
+  {% include solaceMessaging-cloud.md %}
+{% else %}
+    {% include solaceMessaging.md %}
+{% endif %}  
+{% include solaceApi.md %}
 
 ## JMS administered objects
 
@@ -120,30 +66,32 @@ The [JMS specification](http://java.sun.com/products/jms/docs.html){:target="_bl
 This tutorial will use the approach of programmatically creating the required objects. For developers, this is the recommended approach as this enables:
 
 *   Full control for the applications
-*   No requirement to preconfigure the JNDI on the Solace message router or within an LDAP server
+*   No requirement to preconfigure the JNDI on Solace messaging or within an LDAP server
 *   Easier integration into frameworks by avoiding external JNDI lookups.
 
 The programmatic approach is also the convention most often followed with JMS samples. So it should be familiar to developers of JMS application. The Solace JMS API supports both programmatically creating administered objects and JNDI lookup. Developers can learn all about Solace JMS by referring to the [Solace JMS Documentation]({{ site.docs-jms-home }}){:target="_top"}.
 
 
-## Connecting to the Solace message router
+## Connecting to Solace Messaging
 
-In order to send or receive messages, an application must connect to the Solace message router. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
+In order to send or receive messages, an application must connect to Solace messaging. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
 
 The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
 ```java
-final String SOLACE_VPN = "default";
-final String SOLACE_USERNAME = "clientUsername";
-final String SOLACE_PASSWORD = "password";
 
-String solaceHost = args[0];
+String[] split = args[1].split("@");
+
+String host = args[0];
+String vpnName = split[1];
+String username = split[0];
+String password = args[2];
 
 SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-connectionFactory.setHost(solaceHost);
-connectionFactory.setVPN(SOLACE_VPN);
-connectionFactory.setUsername(SOLACE_USERNAME);
-connectionFactory.setPassword(SOLACE_PASSWORD);
+connectionFactory.setHost(host);
+connectionFactory.setVPN(vpnName);
+connectionFactory.setUsername(username);
+connectionFactory.setPassword(password);
 
 Connection connection = connectionFactory.createConnection();
 Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -151,7 +99,7 @@ Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 This tutorial uses an auto acknowledgement session. This is the simplest to use. However, it often makes sense to customize the acknowledgement mode in JMS to suit your application needs. Solace supports all of the JMS acknowledgement modes and introduces an extension which allows applications to individually acknowledge each message which we believe is a significant improvement of the behaviour of the default JMS client acknowledgement. Learn more in the [Solace JMS Documentation - Managing Sessions]({{ site.docs-jms-managing-sessions }}){:target="_top"}.
 
-At this point your client is connected to the Solace message router. You can use SolAdmin to view the client connection and related details.
+At this point your client is connected to Solace messaging. You can use SolAdmin to view the client connection and related details.
 
 ## Receiving a message
 
@@ -220,7 +168,7 @@ Now it is time to send a message to the waiting consumer.
 
 ### Establishing the publisher flow
 
-In JMS, a message producer is required for sending messages to a Solace message router.
+In JMS, a message producer is required for sending messages to Solace messaging.
 
 ```java
 final String TOPIC_NAME = "T/GettingStarted/pubsub";
@@ -241,14 +189,17 @@ messageProducer.send(topic, message, DeliveryMode.NON_PERSISTENT,
         Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
 ```
 
-At this point the producer has sent a message to the Solace message router and your waiting consumer will have received the message and printed its contents to the screen.
+At this point the producer has sent a message to Solace messaging and your waiting consumer will have received the message and printed its contents to the screen.
 
 ## Summarizing
 
 The full source code for this example is available in [GitHub]({{ site.repository }}){:target="_blank"}. If you combine the example source code shown above results in the following source:
 
-*   [TopicPublisher.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/TopicPublisher.java){:target="_blank"}
-*   [TopicSubscriber.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/TopicSubscriber.java){:target="_blank"}
+<ul>
+{% for item in page.links %}
+<li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
+{% endfor %}
+</ul>
 
 ### Getting the Source
 
@@ -271,23 +222,23 @@ This builds all of the JMS Getting Started Samples with OS specific launch scrip
 
 ### Running the Sample
 
-If you start the `TopicSubscriber` with a single argument for the Solace message router host address it will connect and wait for a message.
+If you start the `TopicSubscriber`, with the required arguments of your Solace messaging, it will connect and wait for a message.
 
 ```
-$ ./build/staged/bin/topicSubscriber <HOST>
-TopicSubscriber is connecting to Solace router <HOST>...
-Connected to Solace Message VPN 'default' with client username 'clientUsername'.
+$ ./build/staged/bin/topicSubscriber <host:port> <client-username>@<message-vpn> <client-password>
+TopicSubscriber is connecting to Solace messaging at <host:port>...
+Connected to Solace Message VPN <message-vpn> with client username '<client-username>'.
 Awaiting message...
 ```
 
 Note: log4j logs were omitted in the above to remain concise.
-
-Then you can send a message using the `TopicPublisher` again using a single argument to specify the Solace message router host address. If successful, the output for the producer will look like the following:
+ 
+Then you can send a message using the `TopicPublisher` with the same arguments. If successful, the output for the producer will look like the following:
 
 ```
-$ ./build/staged/bin/topicPublisher <HOST>
-TopicPublisher is connecting to Solace router <HOST>...
-Connected to the Solace Message VPN 'default' with client username 'clientUsername'.
+$ ./build/staged/bin/topicPublisher <host:port> <client-username>@<message-vpn> <client-password>
+TopicPublisher is connecting to Solace messaging at <host:port>...
+Connected to the Solace Message VPN <message-vpn> with client username <client-username>.
 Sending message 'Hello world!' to topic 'T/GettingStarted/pubsub'...
 Sent successfully. Exiting...
 ```
