@@ -115,7 +115,7 @@ public class TopicSubscriber {
 
     public static void main(String... args) throws Exception {
         if (args.length != 3 || args[1].split("@").length != 2) {
-            System.out.println("Usage: TopicPublisher <host:port> <client-username@message-vpn> <client-password>");
+            System.out.println("Usage: TopicSubscriber <host:port> <client-username@message-vpn> <client-password>");
             System.out.println();
             System.exit(-1);
         }
