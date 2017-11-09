@@ -2,26 +2,23 @@
 layout: tutorials
 title: Obtaining JMS objects using JNDI
 summary: Learn how to use JNDI as a way to create JMS objects.
-icon: jndi-tutorial.png
+icon: I_dev_JNDI.svg
+links:
+    - label: QueueProducerJNDI.java
+      link: /blob/master/src/main/java/com/solace/samples/QueueProducerJNDI.java
+    - label: QueueConsumerJNDI.java
+      link: /blob/master/src/main/java/com/solace/samples/QueueConsumerJNDI.java
 ---
 
 This tutorial outlines the use of Java Naming and Directory Interface (JNDI) to create JMS objects including ConnectionFactories and Topic or Queue destinations. The [Publish/Subscribe]({{ site.baseurl }}/publish-subscribe) and other tutorials use the approach of programmatically creating these JMS objects, which is usually recommended for developers but JNDI is also a good option which increases the portability of your JMS application code.
 
 In this tutorial, we’ll follow the same flow as the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial but use JNDI to retrieve the JMS Objects.
 
-Obtaining JMS objects using JNDI requires a lookup of a Solace message router resource by its reference in a JNDI store and then creating a local JMS object from the information returned. With the local JMS object available, the client can start using the associated resource:
+Obtaining JMS objects using JNDI requires a lookup of a Solace messaging resource by its reference in a JNDI store and then creating a local JMS object from the information returned. With the local JMS object available, the client can start using the associated resource:
 
 ![]({{ site.baseurl }}/images/jndi-tutorial.png)
 
-Solace message routers provide a JNDI service to make this integration easy, which we will use here. Alternatively, it is possible to use other JNDI standard compliant services, such as an LDAP-based JNDI store on a remote host as described in the [Solace Documentation]({{ site.docs-jms-establishing-connections }}){:target="_top"}
-
-### Goals
-
-The goal of this tutorial is to demonstrate the use of JNDI as a way to create JMS objects. This tutorial will show you following steps:
-
-1.	Step 1 - How to configure the JNDI service on a Solace message router
-2.	Step 2 - How to retrieve a JMS Connection Factory using JNDI so the client can connect to the Solace message router
-3.	Step 3 - How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
+Solace messaging provides a JNDI service to make this integration easy, which we will use here. Alternatively, it is possible to use other JNDI standard compliant services, such as an LDAP-based JNDI store on a remote host as described in the [Solace Documentation]({{ site.docs-jms-establishing-connections }}){:target="_top"}
 
 ### Assumptions
 
@@ -32,21 +29,33 @@ This tutorial assumes the following:
     *   the Java Messaging Service (JMS) basics
     *   how to send and receive a message using the JMS API
     *   how obtain the Solace JMS API
-*   You have access to a running Solace message router with the following configuration:
-    *   Enabled message-VPN
-    *   Enabled client username
-    *   Client-profile enabled with guaranteed messaging permissions
+*   You have access to Solace messaging with the following configuration details:
+    *   Connectivity information for a Solace message-VPN configured for guaranteed messaging support
+    *   Enabled client username and password
+    *   Client-profile enabled with guaranteed messaging permissions.
     *   Admin level rights to configure the message-VPN
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. This tutorial assumes that you are using the Solace VMR. By default the Solace VMR will run with the “default” message VPN configured with authentication disabled and ready for messaging. The only required information to proceed is the Solace VMR host string which this tutorial accepts as an argument. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
-The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
+{% if jekyll.environment == 'solaceCloud' %}
+One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging on the [home page]({{ site.baseurl }}/) of these tutorials.
+{% else %}
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
+{% endif %}
 
-### Trying it yourself
+### Goals
 
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
+The goal of this tutorial is to demonstrate the use of JNDI as a way to create JMS objects. This tutorial will show you following steps:
 
-At the end, this tutorial walks through downloading and running the sample from source.
+1. How to configure the JNDI service on Solace messaging
+2. How to retrieve a JMS Connection Factory using JNDI so the client can connect to Solace messaging
+3. How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
+
+{% if jekyll.environment == 'solaceCloud' %}
+  {% include solaceMessaging-cloud.md %}
+{% else %}
+    {% include solaceMessaging.md %}
+{% endif %}  
+{% include solaceApi.md %}
 
 ## Step 1: Configuring the JNDI service
 
@@ -57,9 +66,9 @@ This tutorial will make use of the same two JMS objects as the [Persistence with
 
 This time we will take the approach of using JNDI lookup to create these objects.
 
-### Configuring the Solace message router
+### Configuring the Solace Messaging
 
-The following resources need to be configured through admin access to the Solace message router message-VPN:
+The following resources need to be configured through admin access to the Solace message-VPN:
 
 <table>
     <tr>
@@ -80,7 +89,7 @@ The following resources need to be configured through admin access to the Solace
     </tr>
 </table>
 
-There are several ways to manage the Solace message router including:
+There are several ways to manage Solace messaging including:
 
 *   Command Line Interface (CLI)
 *   the Solace Element Management Protocol (SEMP) RESTful API
@@ -130,7 +139,23 @@ jndi message-vpn "default"
   
 ```
 
-To apply this configuration, simply log in to the Solace message router CLI as an `admin` user with the default `admin` password using a Secure Shell (SSH) connection. Then paste the above script fragments into the CLI.
+{% if jekyll.environment == 'solaceCloud' %}
+To apply this configuration, simply log in to Solace messaging CLI as an admin user and paste the above script fragments into the CLI.
+
+If connecting using Solace Cloud, obtain your management credentials by scrolling down to the Management section on the Connectivity tab
+
+![]({{ site.baseurl }}/images/management-info.png)
+
+```
+ssh <management-username>@<HOST> -p 2222
+Solace - Virtual Message Router (VMR)
+Password:
+```
+{% endif %}
+
+ 
+
+If using a VMR load, log in to the Solace message router CLI as an `admin` user with the default `admin` password.
 
 ```
 ssh admin@<HOST>
@@ -138,27 +163,30 @@ Solace - Virtual Message Router (VMR)
 Password:
 ```
 
+
 See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details. 
 
 To learn how to use the SEMP API, refer to the [Solace Element Management Protocol (SEMP) tutorials]({{site.docs-semp-get-started}}){:target="_top"}. To learn about the SolAdmin management application, refer to the [Solace Documentation - SolAdmin Overview]({{site.docs-management-soladmin}}){:target="_top"} and the application's online Help. The application can be [downloaded here]({{ site.links-downloads }}){:target="_top"}.
 
 ## Step 2: Obtaining a JMS ConnectionFactory object using JNDI
 
-In order to send or receive messages, an application must connect to the Solace message router using a `ConnectionFactory`. The following code shows how to obtain a `ConnectionFactory` JMS object using Solace JNDI.
+In order to send or receive messages, an application must connect Solace messaging using a `ConnectionFactory`. The following code shows how to obtain a `ConnectionFactory` JMS object using Solace JNDI.
 
 ```java
-final String SOLACE_VPN = "default";
-final String SOLACE_USERNAME = "clientUsername";
-final String SOLACE_PASSWORD = "password";
 final String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
 
-String solaceHost = args[0];
+String[] split = args[1].split("@");
+
+String host = args[0];
+String vpnName = split[1];
+String username = split[0];
+String password = args[2];
 
 Hashtable<String, Object> env = new Hashtable<String, Object>();
 env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
-env.put(InitialContext.PROVIDER_URL, solaceHost);
-env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN);
-env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
+env.put(InitialContext.PROVIDER_URL, host);
+env.put(Context.SECURITY_PRINCIPAL, username + '@' + vpnName);
+env.put(Context.SECURITY_CREDENTIALS, password);
 
 InitialContext initialContext = new InitialContext(env);
 ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup(CONNECTION_FACTORY_JNDI_NAME);
@@ -172,7 +200,7 @@ JMS Properties can be used to:
 
 *   Configure the JNDI or JMS data connection properties such as security, connection retry or timeouts
 *   Set message or message delivery properties, such as marking a message as a Reply Message, as seen in the [Request/Reply]({{ site.baseurl }}/request-reply) tutorial.
-*   Set general API properties, such as when Dynamic Durables were set to enable dynamic creation of a router resource in the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial.
+*   Set general API properties, such as when Dynamic Durables were set to enable dynamic creation of a resource in the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial.
 
 JMS Properties can be passed to the API in several ways, allowing flexibility to have them preset or a runtime setting. Here we show the use of `Username` as a JMS Property, which the JMS standard does not define.
 
@@ -200,7 +228,7 @@ Or it could have also been taken as preset default from a `jndi.properties` file
 java.naming.security.principal=my-username
 ```
 
-Some JMS properties can even be configured on the Solace message router and the API will use this setting as a default, for example when the JNDI connection factory Delivery Mode property was set by the CLI script:
+Some JMS properties can even be configured on Solace messaging and the API will use this setting as a default, for example when the JNDI connection factory Delivery Mode property was set by the CLI script:
 
 ```
 property "default-delivery-mode" "persistent"
@@ -208,9 +236,9 @@ property "default-delivery-mode" "persistent"
 
 The [Solace JMS Documentation - JMS Properties Reference]({{site.docs-jms-properties-reference}}){:target="_top"} provides detailed description of the use and the list of all JMS properties with options how to configure them. It is recommended to carefully consider the effect of the JMS Properties applied in order to achieve the desired configuration goal.
 
-### Connecting to the Solace message router
+### Connecting to the Solace Messaging
 
-Next, the 'ConnectionFactory' can be used the same way as described in the Persistence with Queues tutorial to create a JMS Connection, at which point your client is connected to the Solace message router and can create a JMS Session.
+Next, the 'ConnectionFactory' can be used the same way as described in the Persistence with Queues tutorial to create a JMS Connection, at which point your client is connected to Solace messaging and can create a JMS Session.
 
 ```java
 Connection connection = connectionFactory.createConnection();
@@ -239,9 +267,11 @@ Once the JMS queue object has been created using JNDI, producers and consumers c
 
 The full source code for this example is available in [GitHub]({{ site.repository }}){:target="_blank"}. If you combine the example source code shown above results in the following source:
 
-*   [QueueProducerJNDI.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/QueueProducerJNDI.java){:target="_blank"}
-*   [QueueConsumerJNDI.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/QueueConsumerJNDI.java){:target="_blank"}
-
+<ul>
+{% for item in page.links %}
+<li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
+{% endfor %}
+</ul>
 
 ### Getting the Source
 
@@ -268,8 +298,8 @@ This builds all of the JMS Getting Started Samples with OS specific launch scrip
 First start the `QueueProducerJNDI` to send a message to the queue. Then you can use the `QueueConsumerJNDI` sample to receive the messages from the queue.
 
 ```
-$ ./build/staged/bin/queueProducerJNDI <HOST>
-$ ./build/staged/bin/queueConsumerJNDI <HOST>
+$ ./build/staged/bin/queueProducerJNDI <host:port> <client-username>@<message-vpn> <client-password>
+$ ./build/staged/bin/queueConsumerJNDI <host:port> <client-username>@<message-vpn> <client-password>
 ```
 
 You have now successfully connected a client, sent persistent messages to a queue and received them from a consumer flow.

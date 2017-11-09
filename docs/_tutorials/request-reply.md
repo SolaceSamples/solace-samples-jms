@@ -2,26 +2,31 @@
 layout: tutorials
 title: Request/Reply
 summary: Learn how to set up request/reply messaging.
-icon: request-reply.png
+icon: I_dev_R+R.svg
+links:
+    - label: BasicRequestor.java
+      link: /blob/master/src/main/java/com/solace/samples/BasicRequestor.java
+    - label: BasicReplier.java
+      link: /blob/master/src/main/java/com/solace/samples/BasicReplier.java
 ---
 
 
 This tutorial outlines both roles in the request-response message exchange pattern. It will show you how to act as the client by creating a request, sending it and waiting for the response. It will also show you how to act as the server by receiving incoming requests, creating a reply and sending it back to the client. It builds on the basic concepts introduced in [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
-
-![]({{ site.baseurl }}/images/request-reply.png)
 
 ## Assumptions
 
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-*   You have access to a running Solace message router with the following configuration:
-    *   Enabled message VPN
-    *   Enabled client username
+*   You have access to Solace messaging with the following configuration details:
+    *   Connectivity information for a Solace message-VPN
+    *   Enabled client username and password
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
-
-The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
+{% if jekyll.environment == 'solaceCloud' %}
+One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging on the [home page]({{ site.baseurl }}/) of these tutorials.
+{% else %}
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
+{% endif %}
 
 ## Goals
 
@@ -43,11 +48,11 @@ JMS is a standard API for sending and receiving messages. As such, in addition t
 2.  [https://en.wikipedia.org/wiki/Java_Message_Service](https://en.wikipedia.org/wiki/Java_Message_Service){:target="_blank"}
 3.  [https://docs.oracle.com/javaee/7/tutorial/partmessaging.htm#GFIRP3](https://docs.oracle.com/javaee/7/tutorial/partmessaging.htm#GFIRP3){:target="_blank"}
 
-The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with your Solace message router.
+The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with Solace messaging.
 
 ## Overview
 
-Request-reply messaging is supported by the Solace message router for all delivery modes. The JMS API does provide a `TopicRequestor` and `QueueRequestor` interface which is very simple. However, this interface lacks the ability to timeout the requests. This limitation means that it is often simpler to implement the request – reply pattern in your application. This tutorial will follow this approach.
+Request-reply messaging is supported by Solace messaging for all delivery modes. The JMS API does provide a `TopicRequestor` and `QueueRequestor` interface which is very simple. However, this interface lacks the ability to timeout the requests. This limitation means that it is often simpler to implement the request – reply pattern in your application. This tutorial will follow this approach.
 
 It is also possible to use guaranteed messaging for request reply scenarios. In this case the replier can listen on a queue for incoming requests and the requestor can use a temporary endpoint to attract replies. This is explained further in the [Solace product documentation]({{ site.docs-gm-rr }}){:target="_top"} and shown in the API samples named `SolJMSRRGuaranteedRequestor` and `SolJMSRRGuaranteedReplier`.
 
@@ -59,46 +64,23 @@ For request-reply messaging to be successful it must be possible for the request
 
 Note: In JMS it also common for the requestor to put a unique message ID into the message on send and have the replier respond with this message ID in the correlation ID field of the response message. This is equally possible with the Solace JMS API. This tutorial favors the correlation ID approach because it works commonly with all Solace messaging APIs.
 
-## Obtaining the Solace API
-
-This tutorial depends on you having the Solace Messaging API for JMS. Here are a few easy ways to get the JMS API. The instructions in the [Building](#building) section assume you're using Gradle and pulling the jars from maven central. If your environment differs then adjust the build instructions appropriately.
-
-### Get the API: Using Gradle
-
-```
-compile("com.solacesystems:sol-jms:10.+")
-```
-
-### Get the API: Using Maven
-
-```
-<dependency>
-  <groupId>com.solacesystems</groupId>
-  <artifactId>sol-jms</artifactId>
-  <version>[10,)</version>
-</dependency>
-```
-
-### Get the API: Using the Solace Developer Portal
-
-The Java API library can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The JMS API is distributed as a zip file containing the required jars, API documentation, and examples. 
-
-## Trying it yourself
-
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
-
-At the end, this tutorial walks through downloading and running the sample from source.
+{% if jekyll.environment == 'solaceCloud' %}
+  {% include solaceMessaging-cloud.md %}
+{% else %}
+    {% include solaceMessaging.md %}
+{% endif %}  
+{% include solaceApi.md %}
 
 ## JMS administered objects
 
 This tutorial will make use of two JMS administered objects:
 
-*   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like a Solace message router
+*   A ConnectionFactory object – Used by JMS clients to successfully connect to a message broker like Solace messaging
 *   A Queue Destination – Used for publishing and subscribing to messages. This example will use the topic `T/GettingStarted/requests`
 
 As described in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe) we will use the approach of programmatically creating the required objects.
 
-## Connecting a session to the message router
+## Connecting a session to Solace Messaging
 
 As with other tutorials, this tutorial requires a JMS `Connection` connected to the default message VPN of a Solace VMR which has authentication disabled. So the only required information to proceed is the Solace VMR host string which this tutorial accepts as an argument. Connect the JMS `Connection` as outlined in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
 
@@ -220,10 +202,13 @@ System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(reply));
 
 ## Summarizing
 
-Combining the example source code show above results in the following source code files:
+The full source code for this example is available in [GitHub]({{ site.repository }}){:target="_blank"}. If you combine the example source code shown above results in the following source:
 
-*   [BasicRequestor.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/BasicRequestor.java){:target="_blank"}
-*   [BasicReplier.java]({{ site.repository }}/blob/master/src/main/java/com/solace/samples/BasicReplier.java){:target="_blank"}
+<ul>
+{% for item in page.links %}
+<li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
+{% endfor %}
+</ul>
 
 ### Getting the Source
 
@@ -249,8 +234,8 @@ This builds all of the JMS Getting Started Samples with OS specific launch scrip
 First start the `BasicReplier` so that it is up and listening for requests. Then you can use the `BasicRequestor` sample to send requests and receive replies.
 
 ```
-$ ./build/staged/bin/basicReplier <HOST>
-$ ./build/staged/bin/basicRequestor <HOST>
+$ ./build/staged/bin/basicReplier <host:port> <client-username>@<message-vpn> <client-password>
+$ ./build/staged/bin/basicRequestor <host:port> <client-username>@<message-vpn> <client-password>
 ```
 
 With that you now know how to successfully implement the request-reply message exchange pattern using JMS NON-PERSISTENT messages and temporary endpoints.

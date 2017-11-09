@@ -45,25 +45,28 @@ import com.solacesystems.jms.SupportedProperty;
  */
 public class QueueConsumer {
 
-    final String SOLACE_VPN = "default";
-    final String SOLACE_USERNAME = "clientUsername";
-    final String SOLACE_PASSWORD = "password";
-
     final String QUEUE_NAME = "Q/tutorial";
 
     // Latch used for synchronizing between threads
     final CountDownLatch latch = new CountDownLatch(1);
 
     public void run(String... args) throws Exception {
-        String solaceHost = args[0];
-        System.out.printf("QueueConsumer is connecting to Solace router %s...%n", solaceHost);
+
+        String[] split = args[1].split("@");
+
+        String host = args[0];
+        String vpnName = split[1];
+        String username = split[0];
+        String password = args[2];
+
+        System.out.printf("QueueConsumer is connecting to Solace messaging at %s...%n", host);
 
         // Programmatically create the connection factory using default settings
         SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
-        connectionFactory.setHost(solaceHost);
-        connectionFactory.setVPN(SOLACE_VPN);
-        connectionFactory.setUsername(SOLACE_USERNAME);
-        connectionFactory.setPassword(SOLACE_PASSWORD);
+        connectionFactory.setHost(host);
+        connectionFactory.setVPN(vpnName);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
 
         // Enables persistent queues or topic endpoints to be created dynamically
         // on the router, used when Session.createQueue() is called below
@@ -75,8 +78,8 @@ public class QueueConsumer {
         // Create a non-transacted, client ACK session.
         Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
-        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
-                SOLACE_USERNAME);
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", vpnName,
+                username);
 
         // Create the queue programmatically and the corresponding router resource
         // will also be created dynamically because DynamicDurables is enabled.
@@ -125,8 +128,19 @@ public class QueueConsumer {
     }
 
     public static void main(String... args) throws Exception {
-        if (args.length < 1) {
-            System.out.println("Usage: TopicSubscriber <msg_backbone_ip:port>");
+        if (args.length != 3 || args[1].split("@").length != 2) {
+            System.out.println("Usage: QueueConsumer <host:port> <client-username@message-vpn> <client-password>");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[0].isEmpty()) {
+            System.out.println("No client-username entered");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[1].isEmpty()) {
+            System.out.println("No message-vpn entered");
+            System.out.println();
             System.exit(-1);
         }
         new QueueConsumer().run(args);

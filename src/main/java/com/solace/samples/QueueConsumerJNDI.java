@@ -49,10 +49,6 @@ import com.solacesystems.jms.SupportedProperty;
  */
 public class QueueConsumerJNDI {
 
-    final String SOLACE_VPN = "default";
-    final String SOLACE_USERNAME = "clientUsername";
-    final String SOLACE_PASSWORD = "password";
-
     final String QUEUE_NAME = "Q/tutorial";
     final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
     final String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
@@ -61,8 +57,15 @@ public class QueueConsumerJNDI {
     final CountDownLatch latch = new CountDownLatch(1);
 
     public void run(String... args) throws Exception {
-        String solaceHost = args[0];
-        System.out.printf("QueueConsumerJNDI is connecting to Solace router %s...%n", solaceHost);
+
+        String[] split = args[1].split("@");
+
+        String host = args[0];
+        String vpnName = split[1];
+        String username = split[0];
+        String password = args[2];
+
+        System.out.printf("QueueConsumerJNDI is connecting to Solace messaging at %s...%n", host);
 
         // setup environment variables for creating of the initial context
         Hashtable<String, Object> env = new Hashtable<String, Object>();
@@ -70,9 +73,9 @@ public class QueueConsumerJNDI {
         env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
   
         // assign Solace message router connection parameters
-        env.put(InitialContext.PROVIDER_URL, solaceHost);
-        env.put(Context.SECURITY_PRINCIPAL, SOLACE_USERNAME + '@' + SOLACE_VPN); // Formatted as user@message-vpn
-        env.put(Context.SECURITY_CREDENTIALS, SOLACE_PASSWORD);
+        env.put(InitialContext.PROVIDER_URL, host);
+        env.put(Context.SECURITY_PRINCIPAL, username + '@' + vpnName); // Formatted as user@message-vpn
+        env.put(Context.SECURITY_CREDENTIALS, password);
 
         // Create the initial context that will be used to lookup the JMS Administered Objects.
         InitialContext initialContext = new InitialContext(env);
@@ -85,8 +88,8 @@ public class QueueConsumerJNDI {
         // Create a non-transacted, client ACK session.
         Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
-        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", SOLACE_VPN,
-                SOLACE_USERNAME);
+        System.out.printf("Connected to the Solace Message VPN '%s' with client username '%s'.%n", vpnName,
+                username);
 
         // Lookup the queue.
         Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
@@ -136,8 +139,19 @@ public class QueueConsumerJNDI {
     }
 
     public static void main(String... args) throws Exception {
-        if (args.length < 1) {
-            System.out.println("Usage: QueueConsumerJNDI <msg_backbone_ip:port>");
+        if (args.length != 3 || args[1].split("@").length != 2) {
+            System.out.println("Usage: QueueConsumerJNDI <host:port> <client-username@message-vpn> <client-password>");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[0].isEmpty()) {
+            System.out.println("No client-username entered");
+            System.out.println();
+            System.exit(-1);
+        }
+        if (args[1].split("@")[1].isEmpty()) {
+            System.out.println("No message-vpn entered");
+            System.out.println();
             System.exit(-1);
         }
         new QueueConsumerJNDI().run(args);

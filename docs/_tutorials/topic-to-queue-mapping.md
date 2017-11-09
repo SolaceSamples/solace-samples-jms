@@ -2,7 +2,7 @@
 layout: tutorials
 title: Topic to Queue Mapping
 summary: Learn how to map existing topics to Solace queues.
-icon: topic-to-queue-mapping.png
+icon: I_dev_topic2q.svg
 ---
 
 This tutorial builds on the basic concepts introduced in [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial and will show you how to make use of one of Solace’s advanced queueing features called “Topic to Queue Mapping.”
