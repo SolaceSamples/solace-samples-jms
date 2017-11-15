@@ -109,7 +109,7 @@ configure
 *   Create a durable queue, configure it and set the admin status for this queue. Here it will not throw an error message if the queue already exists.
 
 ```
-message-spool message-vpn "default"
+message-spool message-vpn "VPNNAME"
 ! pragma:interpreter:ignore-already-exists
   create queue "Q/tutorial" primary
 ! pragma:interpreter:no-ignore-already-exists
@@ -124,7 +124,7 @@ message-spool message-vpn "default"
 *   Properly configure the default message-VPN with the necessary JNDI configuration. This script assumes the JNDI connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below. The script also sets the properties of the JNDI connection factory, which will apply to the connections created when using it. Also notice how the JNDI queue reference is linked to the phisical queue.
 
 ```
-jndi message-vpn "default"
+jndi message-vpn "VPNNAME"
   create connection-factory "/JNDI/CF/GettingStarted"
     property-list "messaging-properties"
         property "text-msg-xml-payload" "false"
@@ -139,9 +139,9 @@ jndi message-vpn "default"
   
 ```
 
-{% if jekyll.environment == 'solaceCloud' %}
-To apply this configuration, simply log in to Solace messaging CLI as an admin user and paste the above script fragments into the CLI.
+To apply this configuration, simply log in to Solace messaging CLI as an admin user and paste the above script fragments into the CLI, replacing VPNNAME to match that of your Solace messaging solution.
 
+{% if jekyll.environment == 'solaceCloud' %}
 If connecting using Solace Cloud, obtain your management credentials by scrolling down to the Management section on the Connectivity tab
 
 ![]({{ site.baseurl }}/images/management-info.png)
