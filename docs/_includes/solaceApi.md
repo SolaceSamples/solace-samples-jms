@@ -6,7 +6,7 @@ This tutorial depends on you having the Solace Messaging API for JMS. Here are a
 ### Get the API: Using Gradle
 
 ```
-compile("com.solacesystems:sol-jms:10.+")
+compile("com.solacesystems:sol-jms:10.2.1")
 ```
 
 ### Get the API: Using Maven
@@ -15,7 +15,7 @@ compile("com.solacesystems:sol-jms:10.+")
 <dependency>
   <groupId>com.solacesystems</groupId>
   <artifactId>sol-jms</artifactId>
-  <version>[10,)</version>
+  <version>10.2.1</version>
 </dependency>
 ```
 
