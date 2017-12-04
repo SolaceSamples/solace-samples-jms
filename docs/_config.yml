@@ -15,7 +15,7 @@ links-java-tutorial: http://dev.solace.com/get-started/java-tutorials/topic-queu
 links-solaceCloud-setup: http://cloud.solace.com/create-messaging-service/
 docs-vmr-setup: http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm
 docs-core-concepts: http://docs.solace.com/Features/Core-Concepts.htm
-docs-jms-home: http://docs.solace.com/Solace-JMS-API/JMS-home-open.htm
+docs-jms-home: https://docs.solace.com/Solace-JMS-API/jms-get-started-open.htm
 docs-jms-connections: http://docs.solace.com/Solace-JMS-API/Establishing-Connections.htm
 docs-jms-managing-sessions: http://docs.solace.com/Solace-JMS-API/Managing-Sessions.htm
 docs-jms-obtaining-connection-factories: http://docs.solace.com/Solace-JMS-API/Obtaining-Connection-Fac.htm
@@ -29,7 +29,6 @@ docs-gm-rr: http://docs.solace.com/Solace-JMS-API/Using-Topic-Requestors.htm
 docs-topic-mapping: http://docs.solace.com/Features/Core-Concepts.htm#topic-queue-mapping
 docs-semp: http://docs.solace.com/SEMP/Using-SEMP-to-Manage-and-Monitor-Routers.htm
 docs-semp-get-started: http://docs.solace.com/SEMP/SEMP-Get-Started.htm
-
 solace-apis-dev:
   - value: http://dev.solace.com/get-started/c-tutorials/
     name: C
@@ -37,6 +36,8 @@ solace-apis-dev:
     name: C#/.NET
   - value: http://dev.solace.com/get-started/java-tutorials/
     name: Java
+  - value: http://dev.solace.com/get-started/java-rto-tutorials/
+    name: Java RTO
   - value: http://dev.solace.com/get-started/javascript-tutorials/
     name: JavaScript
   - value: http://dev.solace.com/get-started/node-js-tutorials/
@@ -71,6 +72,8 @@ solace-apis-cloud:
     name: C#/.NET
   - value: http://cloud.solace.com/samples/solace-samples-java/
     name: Java
+  - value: http://cloud.solace.com/samples/solace-samples-javarto/
+    name: Java RTO
   - value: http://cloud.solace.com/samples/solace-samples-javascript/
     name: JavaScript
   - value: http://cloud.solace.com/samples/solace-samples-nodejs/
@@ -97,7 +100,6 @@ open-apis-cloud:
 
 #----------------------------------------------------
 # Generally don't modify items below this point
-
 url: "solacesamples.github.io" # the base hostname & protocol for your site
 
 # Google services
