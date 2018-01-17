@@ -21,11 +21,7 @@ This tutorial assumes the following:
     *   Connectivity information for a Solace message-VPN
     *   Enabled client username and password
 
-{% if jekyll.environment == 'solaceCloud' %}
 One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
-{% else %}
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
-{% endif %}
 
 ## Goals
 
@@ -44,11 +40,7 @@ JMS is a standard API for sending and receiving messages. As such, in addition t
 
 The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with Solace messaging.
 
-{% if jekyll.environment == 'solaceCloud' %}
-  {% include solaceMessaging-cloud.md %}
-{% else %}
-    {% include solaceMessaging.md %}
-{% endif %}  
+{% include solaceMessaging.md %}
 {% include solaceApi.md %}
 
 ## JMS administered objects
@@ -60,7 +52,7 @@ This tutorial will make use of two JMS administered objects:
 
 The [JMS specification](http://java.sun.com/products/jms/docs.html){:target="_blank"} provides two ways to create administered objects:
 
-*   JNDI Lookup 
+*   JNDI Lookup
 *   Programmatic creation through the JMS API.
 
 This tutorial will use the approach of programmatically creating the required objects. For developers, this is the recommended approach as this enables:
@@ -74,7 +66,7 @@ The programmatic approach is also the convention most often followed with JMS sa
 
 ## Connecting to Solace Messaging
 
-In order to send or receive messages, an application must connect to Solace messaging. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers. 
+In order to send or receive messages, an application must connect to Solace messaging. In JMS, a client connects by creating a `Connection` from the `ConnectionFactory`. Then a JMS `Session` is used as a factory for consumers and producers.
 
 The following code shows how to create a connection using a programmatically created `ConnectionFactory`. You can learn more about other ways to create ConnectionFactories by referring to [Solace JMS Documentation - Obtaining Connection Factories]({{ site.docs-jms-obtaining-connection-factories }}){:target="_top"}.
 
@@ -232,7 +224,7 @@ Awaiting message...
 ```
 
 Note: log4j logs were omitted in the above to remain concise.
- 
+
 Then you can send a message using the `TopicPublisher` with the same arguments. If successful, the output for the producer will look like the following:
 
 ```
@@ -274,5 +266,3 @@ The received message is printed to the screen. The `TextMessage` contents was �
 You have now successfully connected a client, subscribed to a topic and exchanged messages using this topic.
 
 If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.
-
-

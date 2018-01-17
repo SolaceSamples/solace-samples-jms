@@ -35,12 +35,7 @@ This tutorial assumes the following:
     *   Client-profile enabled with guaranteed messaging permissions.
     *   Admin level rights to configure the message-VPN
 
-
-{% if jekyll.environment == 'solaceCloud' %}
 One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
-{% else %}
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
-{% endif %}
 
 ### Goals
 
@@ -50,11 +45,7 @@ The goal of this tutorial is to demonstrate the use of JNDI as a way to create J
 2. How to retrieve a JMS Connection Factory using JNDI so the client can connect to Solace messaging
 3. How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
 
-{% if jekyll.environment == 'solaceCloud' %}
-  {% include solaceMessaging-cloud.md %}
-{% else %}
-    {% include solaceMessaging.md %}
-{% endif %}  
+{% include solaceMessaging.md %}
 {% include solaceApi.md %}
 
 ## Step 1: Configuring the JNDI service
@@ -118,7 +109,7 @@ message-spool message-vpn "VPNNAME"
     no shutdown
     exit
   exit
-  
+
 ```
 
 *   Properly configure the default message-VPN with the necessary JNDI configuration. This script assumes the JNDI connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below. The script also sets the properties of the JNDI connection factory, which will apply to the connections created when using it. Also notice how the JNDI queue reference is linked to the phisical queue.
@@ -136,7 +127,7 @@ jndi message-vpn "VPNNAME"
       property "physical-name" "Q/tutorial"
       exit
   exit
-  
+
 ```
 
 To apply this configuration, simply log in to Solace messaging CLI as an admin user and paste the above script fragments into the CLI, replacing VPNNAME to match that of your Solace messaging solution.
@@ -153,7 +144,7 @@ Password:
 ```
 {% endif %}
 
- 
+
 
 If using a VMR load, log in to the Solace message router CLI as an `admin` user with the default `admin` password.
 
@@ -164,7 +155,7 @@ Password:
 ```
 
 
-See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details. 
+See the [Solace Documentation - Solace Router CLI]({{site.docs-management-cli}}){:target="_top"} for more details.
 
 To learn how to use the SEMP API, refer to the [Solace Element Management Protocol (SEMP) tutorials]({{site.docs-semp-get-started}}){:target="_top"}. To learn about the SolAdmin management application, refer to the [Solace Documentation - SolAdmin Overview]({{site.docs-management-soladmin}}){:target="_top"} and the application's online Help. The application can be [downloaded here]({{ site.links-downloads }}){:target="_top"}.
 

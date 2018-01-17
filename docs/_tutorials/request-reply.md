@@ -22,11 +22,7 @@ This tutorial assumes the following:
     *   Connectivity information for a Solace message-VPN
     *   Enabled client username and password
 
-{% if jekyll.environment == 'solaceCloud' %}
 One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
-{% else %}
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
-{% endif %}
 
 ## Goals
 
@@ -64,11 +60,7 @@ For request-reply messaging to be successful it must be possible for the request
 
 Note: In JMS it also common for the requestor to put a unique message ID into the message on send and have the replier respond with this message ID in the correlation ID field of the response message. This is equally possible with the Solace JMS API. This tutorial favors the correlation ID approach because it works commonly with all Solace messaging APIs.
 
-{% if jekyll.environment == 'solaceCloud' %}
-  {% include solaceMessaging-cloud.md %}
-{% else %}
-    {% include solaceMessaging.md %}
-{% endif %}  
+{% include solaceMessaging.md %}
 {% include solaceApi.md %}
 
 ## JMS administered objects
@@ -115,7 +107,7 @@ Finally send the request and wait for the response. This example demonstrates a 
 
 ```java
 final int REPLY_TIMEOUT_MS = 10000; // 10 seconds
-requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT, 
+requestProducer.send(requestTopic, request, DeliveryMode.NON_PERSISTENT,
         Message.DEFAULT_PRIORITY,
         Message.DEFAULT_TIME_TO_LIVE);
 Message reply = replyConsumer.receive(REPLY_TIMEOUT_MS);
