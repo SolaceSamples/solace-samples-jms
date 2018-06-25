@@ -40,8 +40,8 @@ JMS is a standard API for sending and receiving messages. As such, in addition t
 
 The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with Solace messaging.
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## JMS administered objects
 
@@ -99,7 +99,7 @@ This tutorial uses JMS “Non-Persistent” messages which are at most once deli
 
 With a session connected in the previous step, the next step is to create a message consumer. Message consumers enable the synchronous or asynchronous receipt of messages. Asynchronous receipt of messages is accomplished through callbacks. These callbacks are defined in JMS by the `MessageListener` interface.
 
-![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
+![]({{ site.baseurl }}/assets/images/pub-sub-receiving-message-300x134.png)
 
 First a `Topic` object is required. Here we create a topic from the JMS Session session programmatically. For other ways of obtaining a `Topic`, for example using JNDI, refer to the [Solace JMS Documentation - Working with Destinations]({{ site.docs-jms-working-with-destinations }}){:target="_top"}.
 
@@ -156,7 +156,7 @@ At this point the consumer is ready to receive messages.
 
 Now it is time to send a message to the waiting consumer.
 
-![]({{ site.baseurl }}/images/pub-sub-sending-message-300x134.png)
+![]({{ site.baseurl }}/assets/images/pub-sub-sending-message-300x134.png)
 
 ### Establishing the publisher flow
 

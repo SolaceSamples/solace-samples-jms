@@ -56,12 +56,12 @@ It is also possible to use guaranteed messaging for request reply scenarios. In 
 
 For request-reply messaging to be successful it must be possible for the requestor to correlate the request with the subsequent reply. Solace messages support two fields that are needed to enable request-reply correlation. The reply-to field can be used by the requestor to indicate a Solace Topic or Queue where the reply should be sent. In JMS, a natural choice for this is a temporary queue. The second requirement is to be able to identify the reply message within the stream of incoming messages. This is accomplished using the correlation-id field. This field will transit the Solace messaging system unmodified. Repliers can include the same correlation-id in a reply message to allow the requestor to detect the corresponding reply. The figure below outlines this exchange.
 
-![]({{ site.baseurl }}/images/Request-Reply_diagram-1.png)
+![]({{ site.baseurl }}/assets/images/Request-Reply_diagram-1.png)
 
 Note: In JMS it also common for the requestor to put a unique message ID into the message on send and have the replier respond with this message ID in the correlation ID field of the response message. This is equally possible with the Solace JMS API. This tutorial favors the correlation ID approach because it works commonly with all Solace messaging APIs.
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## JMS administered objects
 
@@ -79,7 +79,7 @@ As with other tutorials, this tutorial requires a JMS `Connection` connected to 
 ## Making a request
 
 First let’s look at the requestor. This is the application that will send the initial request message and wait for the reply.  
-![]({{ site.baseurl }}/images/Request-Reply_diagram-2.png)
+![]({{ site.baseurl }}/assets/images/Request-Reply_diagram-2.png)
 
 In order to be able to receive the response message back from the Replier, the Requestor must setup a JMS `Consumer`. For simplicity, this tutorial will use a blocking Consumer to receive the response messages using a temporary queue.
 
@@ -123,7 +123,7 @@ If no response is received within the timeout specified (10 seconds in this exam
 
 Now it is time to receive the request and generate an appropriate reply.
 
-![Request-Reply_diagram-3]({{ site.baseurl }}/images/Request-Reply_diagram-3.png)
+![Request-Reply_diagram-3]({{ site.baseurl }}/assets/images/Request-Reply_diagram-3.png)
 
 Just as with previous tutorials, you still need to connect a JMS Connection and Session and create a MessageConsumer to receive request messages. However, in order to send replies back to the requestor, you will also need a MessageProducer. The following code will create the producer and consumer that is required.
 
