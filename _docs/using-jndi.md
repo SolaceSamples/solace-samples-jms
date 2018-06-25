@@ -16,7 +16,7 @@ In this tutorial, we’ll follow the same flow as the [Persistence with Queues](
 
 Obtaining JMS objects using JNDI requires a lookup of a Solace messaging resource by its reference in a JNDI store and then creating a local JMS object from the information returned. With the local JMS object available, the client can start using the associated resource:
 
-![]({{ site.baseurl }}/images/jndi-tutorial.png)
+![]({{ site.baseurl }}/assets/images/jndi-tutorial.png)
 
 Solace messaging provides a JNDI service to make this integration easy, which we will use here. Alternatively, it is possible to use other JNDI standard compliant services, such as an LDAP-based JNDI store on a remote host as described in the [Solace Documentation]({{ site.docs-jms-establishing-connections }}){:target="_top"}
 
@@ -45,8 +45,8 @@ The goal of this tutorial is to demonstrate the use of JNDI as a way to create J
 2. How to retrieve a JMS Connection Factory using JNDI so the client can connect to Solace messaging
 3. How to lookup a JMS Queue destination object using JNDI so the client can publish or subscribe to it
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## Step 1: Configuring the JNDI service
 
@@ -135,7 +135,7 @@ To apply this configuration, simply log in to Solace messaging CLI as an admin u
 {% if jekyll.environment == 'solaceCloud' %}
 If connecting using Solace Cloud, obtain your management credentials by scrolling down to the Management section on the Connectivity tab
 
-![]({{ site.baseurl }}/images/management-info.png)
+![]({{ site.baseurl }}/assets/images/management-info.png)
 
 ```
 ssh <management-username>@<HOST> -p 2222

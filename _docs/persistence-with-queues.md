@@ -44,8 +44,8 @@ JMS is a standard API for sending and receiving messages. As such, in addition t
 The oracle link points you to the JavaEE official tutorials which provide a good introduction to JMS. This getting started tutorial follows a similar path and shows you the Solace specifics that you need to do to get this working with Solace messaging.
 
 
-{% include solaceMessaging.md %} 
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %} 
+{% include_relative assets/solaceApi.md %}
 
 ## JMS administered objects
 
@@ -81,7 +81,7 @@ Because the Dynamic Durables property has been enabled when creating the connect
 
 Now it is time to send a message to the queue.
 
-![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
+![sending-message-to-queue]({{ site.baseurl }}/assets/images/sending-message-to-queue-300x160.png)
 
 There is no difference in the actual method calls to the JMS `MessageProducer` when sending a PERSISTENT message as compared to a NON-PERSISTENT message shown in the publish/subscribe tutorial. The difference in the PERSISTENT message is that Solace messaging will acknowledge the message once it is successfully stored on the message router and the `MessageProducer.send()` call will not return until it has successfully received this acknowledgement. This means that in JMS, all calls to the `MessageProducer.send()` are blocking calls and they wait for message confirmation from Solace messaging before proceeding. This is outlined in the JMS 1.1 specification and Solace JMS adheres to this requirement.
 
@@ -98,7 +98,7 @@ At this point the producer has sent a message to Solace messaging and it will be
 
 Now it is time to receive the messages sent to your queue.
 
-![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
+![]({{ site.baseurl }}/assets/images/receiving-message-from-queue-300x160.png)
 
 You still need a JMS `Connection` just as you did with the producer. With a connection, you then need to create a Session and bind to Solace messaging queue by creating a `MessageConsumer`. This is nearly identical to what was shown in the publish/subscribe tutorial. In this case, create a Session but use the Solace client acknowledgement mode. This allows the consumers to acknowledge each message individually without side-effects. You can learn more about acknowledgement modes in the Establishing Connections sections of [Solace JMS Documentation – Establishing Connections]({{ site.docs-jms-connections }}){:target="_top"}.
 
