@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    compile("com.solacesystems:sol-jms:10.2.1")
+    compile("com.solacesystems:sol-jms:10.4.0")
 }
 
 task createAllStartScripts() << {
