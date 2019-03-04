@@ -13,7 +13,7 @@ links-downloads: //dev.solace.com/downloads/
 links-tech-other: //dev.solace.com/tech/#other
 links-java-tutorial: //dev.solace.com/get-started/java-tutorials/topic-queue-mapping_java/
 links-solaceCloud-setup: //cloud.solace.com/create-messaging-service/
-docs-core-concepts: //docs.solace.com/Features/Core-Concepts.htm
+docs-core-concepts: //docs.solace.com/Messaging-Basics/Core-Concepts.htm
 docs-jms-home: //docs.solace.com/Solace-JMS-API/jms-get-started-open.htm
 docs-jms-connections: //docs.solace.com/Solace-JMS-API/Establishing-Connections.htm
 docs-jms-managing-sessions: //docs.solace.com/Solace-JMS-API/Managing-Sessions.htm

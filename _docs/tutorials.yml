@@ -6,5 +6,6 @@
   - confirmed-delivery
   - topic-to-queue-mapping
   - using-jndi
+  - using-external-jndi
 
   features:
