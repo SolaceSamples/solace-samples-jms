@@ -12,7 +12,7 @@ links:
 
 This tutorial shows how to provision and look up Solace JMS objects from an external [Java Naming and Directory Interface (JNDI)](https://en.wikipedia.org/wiki/Java_Naming_and_Directory_Interface ) service, hosted outside the Solace message broker.
 
-The "Obtaining JMS objects using JNDI" tutorial provided an introduction to JNDI and the use of JNDI services hosted by the message broker. Using the Solace built-in (internal) JNDI server makes integration easy, but some enterprise use-cases already utilize a dedicated JNDI server, and prefer to store Solace JMS objects at the same location. 
+The [Obtaining JMS objects using JNDI]({{ site.baseurl }}/using-jndi) tutorial provided an introduction to JNDI and the use of JNDI services hosted by the message broker. Using the Solace built-in (internal) JNDI server makes integration easy, but some enterprise use-cases already utilize a dedicated JNDI server, and prefer to store Solace JMS objects at the same location. 
 
 ## Assumptions
 
@@ -51,7 +51,7 @@ This tutorial will use the two JMS objects from the [Persistence with Queues]({{
 
 This time they will be created from an external JNDI server lookup, essentially de-serialized from the respective references returned. The sample code will act as a client to the JNDI server.
 
-JNDI has a wide range of server implementations. We will use the simplest: a local file system based JNDI implementation that is so simple that it will not even use authentication. Your JNDI service provider will likely be more complex in that you will need specific configuration, but this example will give an idea of usage, and the kind of data being stored in JNDI for the Solace JMS objects.
+JNDI has a wide range of server implementations. We will use the simplest: a local file system based JNDI implementation that is so simple that it will not even use authentication. Your JNDI service provider will likely be more complex in that you will need specific configuration, but this example will give an idea of usage, and the kind of data being stored in JNDI for the Solace JMS objects. Examples of JNDI providers include LDAP or CORBA Naming Service implementations, the native JNDI service of application servers like IBM WebSphere, JBoss and Oracle WebLogic.
 
 The first sample application will provision Solace JMS object data (entries) into the external JNDI server. The sample code will show how to create, read, update, or delete JNDI entries. When creating JNDI entries, we will import existing real JNDI data from the Solace internal JNDI server by using a separate JNDI connection to read from there. This tutorial can be used together with the [Obtaining JMS objects using JNDI]({{ site.baseurl }}/using-jndi) tutorial to learn more and experiment with the differences.
 
@@ -73,9 +73,9 @@ Additional basic administration operations included are:
 
 ### Connecting to a JNDI server
 
-JNDI clients need a Java jar library supplied by the service provider to connect and use the JNDI server. The jar client library contains the implementation of [javax.naming.spi.InitialContextFactory](https://docs.oracle.com/javase/8/docs/api/javax/naming/spi/InitialContextFactory.html ). For example, for the Solace message broker internal JNDI this is included in the Solace JMS API jar file, and the factory class is `com.solacesystems.jndi.SolJNDIInitialContextFactory`. The jar file for the file system based JNDI implementation is [fscontext.jar](https://mvnrepository.com/artifact/com.sun.messaging.mq/fscontext ), and the factory class is `com.sun.jndi.fscontext.RefFSContextFactory`.
+JNDI clients need a Java jar library supplied by the service provider to connect and use the JNDI server. The jar client library contains the implementation of [javax.naming.spi.InitialContextFactory](https://docs.oracle.com/javase/8/docs/api/javax/naming/spi/InitialContextFactory.html ). For example, for the Solace message broker internal JNDI this is included in the Solace JMS API jar file, and the factory class is `com.solacesystems.jndi.SolJNDIInitialContextFactory`. The jar file for the file system based JNDI implementation used in this tutorial is [fscontext.jar](https://mvnrepository.com/artifact/com.sun.messaging.mq/fscontext ), and the factory class is `com.sun.jndi.fscontext.RefFSContextFactory`.
 
-This is the typical pattern to connect to a JNDI server. Generally, it requires the connection url (PROVIDER_URL), username (SECURITY_PRINCIPAL), and password (SECURITY_CREDENTIALS). In our simple file system based JNDI example the username and password will be ignored.
+This is the typical pattern to connect to a JNDI server. Generally, it requires the InitialContextFactory implementation class name (INITIAL_CONTEXT_FACTORY), connection url (PROVIDER_URL), username (SECURITY_PRINCIPAL), and password (SECURITY_CREDENTIALS). In our simple file system based JNDI example the username and password will be ignored.
 
 ```java
 // JNDI Initial Context Factory
@@ -232,6 +232,22 @@ First, start the `QueueProducerJNDI` to send a message to the queue. Then you ca
 $ ./build/staged/bin/queueProducerJNDI <host:port> <client-username>@<message-vpn> <client-password>
 $ ./build/staged/bin/queueConsumerJNDI <host:port> <client-username>@<message-vpn> <client-password>
 ```
+
+
+
+```
+-solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 -solacePassword 79p9dhl88mse2e41v9ukqrhb0r -jndiUrl file://~/temp/ -jndiUsername default -jndiPassword default -operation LIST -cf /jms/cf/default -name cell/persistent/cell
+
+
+
+-solaceURL tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 -solacePassword 79p9dhl88mse2e41v9ukqrhb0r -jndiURL corbaloc:iiop:localhost:2809 -jndiUsername default -jndiPassword password -operation LIST -name cell/persistent/cell
+-jndiURL corbaloc:iiop:localhost:2809 -jndiUsername default -jndiPassword password -jndiCFName cell/persistent/SolaceCF -jndiDestName cell/persistent/ReplyQueue
+
+
+
+
+
+
 
 You have now successfully connected a client, sent persistent messages to a queue, and received them from a consumer flow.
 
