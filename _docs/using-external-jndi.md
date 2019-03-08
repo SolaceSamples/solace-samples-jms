@@ -236,7 +236,7 @@ Using the "ExtJndiImport" sample, export the JNDI configuration to the external 
 * Solace JNDI access details (url, username, password)
     * The Solace username takes the form of `username@message-vpn`
 * External JNDI access details (url, username, password)
-    * The url for the file-based JNDI must be an existing directory, where a file named `.bindings` will be created if it didn't exist and it can be considered as a simple database. There is no control over the filename. In this tutorial we use the `~/temp` directory, which in Windows may refer to a `\temp` folder under the current drive.
+    * The url for the file-based JNDI must be an existing directory, where a file named `.bindings` will be created if it didn't exist and it can be considered as a simple database. There is no control over the filename. In this tutorial we use the `/tmp` directory, which in Windows may refer to a `\tmp` folder under the current drive.
     * The file-based JNDI example will ignore username and password; the code has been written to require it.
 * Operation: BIND, REBIND, UNBIND or LIST (UNBIND and LIST don't require Solace JNDI access details)
 * The JMS object reference name in Solace JNDI (-cf for ConnectionFactory, -queue or -topic)
@@ -244,25 +244,25 @@ Using the "ExtJndiImport" sample, export the JNDI configuration to the external 
 
 ```sh
 # Export first the connection factory
-$ ./build/staged/bin/ExtJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
+$ ./build/staged/bin/extJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
                                    -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 \
                                    -solacePassword 79p9dhl88mse2e41v9ukqrhb0r \
-                                   -jndiUrl file://~/temp/ \
+                                   -jndiUrl file:///tmp/ \
                                    -jndiUsername default \
                                    -jndiPassword password \
                                    -operation BIND \
                                    -cf /JNDI/CF/GettingStarted \
-                                   -name ext/cf/gettingstarted
+                                   -name ext-cf
 # Then export the queue
-$ ./build/staged/bin/ExtJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
+$ ./build/staged/bin/extJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
                                    -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 \
                                    -solacePassword 79p9dhl88mse2e41v9ukqrhb0r \
-                                   -jndiUrl file://~/temp/ \
+                                   -jndiUrl file:///tmp/ \
                                    -jndiUsername default \
                                    -jndiPassword password \
                                    -operation BIND \
                                    -queue /JNDI/Q/tutorial \
-                                   -name ext/q/tutorial
+                                   -name ext-q
 ```
 
 Observe the contents of the ".bindings" file using a text editor - it contains the imported ConnectionFactory and Queue attributes. The representation is proprietary to the JNDI provider.
@@ -270,11 +270,11 @@ Observe the contents of the ".bindings" file using a text editor - it contains t
 Then use the "ExtJndiTest" sample to test messaging with external JNDI lookup. The parameters here all refer to settings and provisioned names in the external JNDI store. The "destination" parameter can be a queue or topic.
 
 ```sh
-$ ./build/staged/bin/ExtJndiTest -jndiUrl file://~/temp/ \
+$ ./build/staged/bin/extJndiTest -jndiUrl file:///tmp/ \
                                  -jndiUsername default \
                                  -jndiPassword password \
-                                 -cf ext/cf/gettingstarted \
-                                 -destination ext/q/tutorial
+                                 -cf ext-cf \
+                                 -destination ext-q
 ```
 
 

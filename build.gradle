@@ -34,7 +34,6 @@ dependencies {
     // Solace Messaging API for JMS Dependencies
     compile("com.solacesystems:sol-jms:10.5.0")
     compile("com.sun.messaging.mq:fscontext:4.6-b01")
-    compile("org.jboss.as:jboss-as-ejb-client-bom:7.1.1.Final")
     // For any local libs that are not available from mavenCentral
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

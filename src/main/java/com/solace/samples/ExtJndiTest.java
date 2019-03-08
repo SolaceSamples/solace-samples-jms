@@ -131,7 +131,7 @@ public class ExtJndiTest {
                 public void onMessage(Message message) {
                     if (message instanceof TextMessage) {
                         try {
-                            System.out.println("Received Message: " + ((TextMessage)message).getText());
+                            System.out.println("*** Received Message with content: " + ((TextMessage)message).getText());
                             // ACK the received message because of the set SupportedProperty.SOL_CLIENT_ACKNOWLEDGE above
                             message.acknowledge();
                             latch.countDown(); // unblock the main thread
@@ -150,7 +150,7 @@ public class ExtJndiTest {
             // Send a message to the consumer
             Message testMessage = session.createTextMessage("SolJMSJNDITest message");
             producer.send(testMessage);
-            System.out.println("Sent Message: " + ((TextMessage)testMessage).getText());
+            System.out.println("*** Sent Message with content: " + ((TextMessage)testMessage).getText());
             
             // Block main thread and wait for the message to be received and printed out before exiting
             latch.await();
