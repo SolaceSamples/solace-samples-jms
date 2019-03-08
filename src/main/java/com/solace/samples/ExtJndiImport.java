@@ -54,6 +54,8 @@ public class ExtJndiImport {
 
     // External JNDI Initial Context Factory
     private static final String EXTJNDI_INITIAL_CONTEXT_FACTORY = 
+    // "org.jboss.naming.remote.client.InitialContextFactory";
+    // "org.jnp.interfaces.NamingContextFactory"; 
     // "com.ibm.websphere.naming.WsnInitialContextFactory";
     // "com.sun.jndi.ldap.LdapCtxFactory";
     "com.sun.jndi.fscontext.RefFSContextFactory";

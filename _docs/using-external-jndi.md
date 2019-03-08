@@ -4,10 +4,10 @@ title: Obtaining JMS objects using external JNDI service
 summary: Learn how to provision and lookup Solace JMS objects when using an external JNDI service.
 icon: I_dev_JNDI.svg
 links:
-    - label: JndiProvisioner.java
-      link: /blob/master/src/main/java/com/solace/samples/QueueProducerJNDI.java
-    - label: JndiTester.java
-      link: /blob/master/src/main/java/com/solace/samples/QueueConsumerJNDI.java
+    - label: ExtJndiImport.java
+      link: /blob/master/src/main/java/com/solace/samples/ExtJndiImport.java
+    - label: ExtJndiTest.java
+      link: /blob/master/src/main/java/com/solace/samples/ExtJndiTest.java
 ---
 
 This tutorial shows how to provision and look up Solace JMS objects from an external [Java Naming and Directory Interface (JNDI)](https://en.wikipedia.org/wiki/Java_Naming_and_Directory_Interface ) service, hosted outside the Solace message broker.
@@ -217,38 +217,67 @@ cd {{ site.repository | split: '/' | last }}
 
 Building these examples is simple; you can use Gradle.
 
-```
+```sh
 ./gradlew assemble
 ```
 
 This builds all the JMS Getting Started Samples with OS specific launch scripts. The files are staged in the `build/staged` directory.
 
-
 ### Running the Sample
 
-First, start the `QueueProducerJNDI` to send a message to the queue. Then you can use the `QueueConsumerJNDI` sample to receive the messages from the queue.
+First, ensure that the Solace internal JNDI has been configured as described in the [Obtaining JMS objects using JNDI tutorial]({{ site.baseurl }}/using-jndi#configuring-the-solace-messaging ), so we can assume followings exist:
 
+| Solace JNDI ConnectionFactory name | /JNDI/CF/GettingStarted |
+| Solace JNDI Queue name             | /JNDI/Q/tutorial |
+
+Also, see section [Get Solace Messaging](#get-solace-messaging) for Solace hostname, message-vpn (or the one you created), username and password.
+
+Using the "ExtJndiImport" sample, export the JNDI configuration to the external JNDI, passing all the required parameters (examples are provided here, replace them to your values):
+* Solace JNDI access details (url, username, password)
+    * The Solace username takes the form of `username@message-vpn`
+* External JNDI access details (url, username, password)
+    * The url for the file-based JNDI must be an existing directory, where a file named `.bindings` will be created if it didn't exist and it can be considered as a simple database. There is no control over the filename. In this tutorial we use the `~/temp` directory, which in Windows may refer to a `\temp` folder under the current drive.
+    * The file-based JNDI example will ignore username and password; the code has been written to require it.
+* Operation: BIND, REBIND, UNBIND or LIST (UNBIND and LIST don't require Solace JNDI access details)
+* The JMS object reference name in Solace JNDI (-cf for ConnectionFactory, -queue or -topic)
+* The JMS object reference name to be created in External JNDI (-name)
+
+```sh
+# Export first the connection factory
+$ ./build/staged/bin/ExtJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
+                                   -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 \
+                                   -solacePassword 79p9dhl88mse2e41v9ukqrhb0r \
+                                   -jndiUrl file://~/temp/ \
+                                   -jndiUsername default \
+                                   -jndiPassword password \
+                                   -operation BIND \
+                                   -cf /JNDI/CF/GettingStarted \
+                                   -name ext/cf/gettingstarted
+# Then export the queue
+$ ./build/staged/bin/ExtJndiImport -solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 \
+                                   -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 \
+                                   -solacePassword 79p9dhl88mse2e41v9ukqrhb0r \
+                                   -jndiUrl file://~/temp/ \
+                                   -jndiUsername default \
+                                   -jndiPassword password \
+                                   -operation BIND \
+                                   -queue /JNDI/Q/tutorial \
+                                   -name ext/q/tutorial
 ```
-$ ./build/staged/bin/queueProducerJNDI <host:port> <client-username>@<message-vpn> <client-password>
-$ ./build/staged/bin/queueConsumerJNDI <host:port> <client-username>@<message-vpn> <client-password>
+
+Observe the contents of the ".bindings" file using a text editor - it contains the imported ConnectionFactory and Queue attributes. The representation is proprietary to the JNDI provider.
+
+Then use the "ExtJndiTest" sample to test messaging with external JNDI lookup. The parameters here all refer to settings and provisioned names in the external JNDI store. The "destination" parameter can be a queue or topic.
+
+```sh
+$ ./build/staged/bin/ExtJndiTest -jndiUrl file://~/temp/ \
+                                 -jndiUsername default \
+                                 -jndiPassword password \
+                                 -cf ext/cf/gettingstarted \
+                                 -destination ext/q/tutorial
 ```
 
 
+You have now successfully imported settings into the external JNDI server, then used it to access the Solace message broker for JMS messaging.
 
-```
--solaceUrl tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 -solacePassword 79p9dhl88mse2e41v9ukqrhb0r -jndiUrl file://~/temp/ -jndiUsername default -jndiPassword default -operation LIST -cf /jms/cf/default -name cell/persistent/cell
-
-
-
--solaceURL tcps://vmr-mr8v6yiwicdj.messaging.solace.cloud:20258 -solaceUsername solace-cloud-client@msgvpn-3e5sq7dbsw9 -solacePassword 79p9dhl88mse2e41v9ukqrhb0r -jndiURL corbaloc:iiop:localhost:2809 -jndiUsername default -jndiPassword password -operation LIST -name cell/persistent/cell
--jndiURL corbaloc:iiop:localhost:2809 -jndiUsername default -jndiPassword password -jndiCFName cell/persistent/SolaceCF -jndiDestName cell/persistent/ReplyQueue
-
-
-
-
-
-
-
-You have now successfully connected a client, sent persistent messages to a queue, and received them from a consumer flow.
-
-If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.
+If you have any issues importing or sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.

@@ -41,6 +41,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import com.solacesystems.jms.SolConnectionFactory;
+import com.solacesystems.jms.SupportedProperty;
 
 /**
  * Sends a persistent message to a queue using external JNDI lookup, then reads it back.
@@ -57,7 +58,7 @@ public class ExtJndiTest {
             // "com.sun.jndi.rmi.registry.RegistryContextFactory";
 
     // The URL to the JNDI server
-    private String jndiURL;
+    private String jndiUrl;
     
     // Username used to log into the JNDI server
     private String jndiUsername;
@@ -66,17 +67,17 @@ public class ExtJndiTest {
     private String jndiPassword;
 
     // Connection Factory Distinguished Name - Must exist in the JNDI
-    private String jndiCFName;
+    private String cfName;
     
     // Destination Distinguished Name  - Must exist in the JNDI
-    private String jndiDestName;
+    private String destinationName;
         
     // Latch used for synchronizing between threads
     final CountDownLatch latch = new CountDownLatch(1);
 
     private void printUsage() {
         System.out.println("\nUsage: \nSExtJndiTest" + 
-                " -jndiURL URL -jndiUsername USERAME -jndiPassword PASSWORD -jndiCFName CONNECTION_FACTORY_DN -jndiDestName DESTINATION_DN\n");
+                " -jndiUrl URL -jndiUsername USERNAME -jndiPassword PASSWORD -cf CONNECTION_FACTORY_DN -destination DESTINATION_DN\n");
     }
         
     private void run() {   
@@ -91,27 +92,23 @@ public class ExtJndiTest {
             // Create the LDAP Initial Context
             Hashtable<String,String> env = new Hashtable<String,String>();
             env.put(Context.INITIAL_CONTEXT_FACTORY, JNDI_INITIAL_CONTEXT_FACTORY);
-            env.put(Context.PROVIDER_URL, jndiURL);
+            env.put(Context.PROVIDER_URL, jndiUrl);
             env.put(Context.REFERRAL, "throw");
             env.put(Context.SECURITY_PRINCIPAL, jndiUsername);
             env.put(Context.SECURITY_CREDENTIALS, jndiPassword);
             ctx = new InitialContext(env);
 
             // lookup the connection factory
-            SolConnectionFactory cf = (SolConnectionFactory)ctx.lookup(jndiCFName);
+            SolConnectionFactory cf = (SolConnectionFactory)ctx.lookup(cfName);
             
             // lookup the destination
-            Object destination = ctx.lookup(jndiDestName);
+            Object destination = ctx.lookup(destinationName);
                             
             // Create a JMS Connection instance .
             connection = cf.createConnection();
                                     
-            // Print version information.
-            ConnectionMetaData metadata = connection.getMetaData();
-            System.out.println(metadata.getJMSProviderName() + " " + metadata.getProviderVersion());
-
-            // Create a non-transacted, Auto Ack session.
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            // Create a non-transacted, client ACK session.
+            Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
 
             // Create the producer and consumer
             MessageConsumer consumer = null;
@@ -134,7 +131,9 @@ public class ExtJndiTest {
                 public void onMessage(Message message) {
                     if (message instanceof TextMessage) {
                         try {
-                            System.out.println("Received Message: " + ((TextMessage)message).getText() + " on destination " + message.getJMSDestination());
+                            System.out.println("Received Message: " + ((TextMessage)message).getText());
+                            // ACK the received message because of the set SupportedProperty.SOL_CLIENT_ACKNOWLEDGE above
+                            message.acknowledge();
                             latch.countDown(); // unblock the main thread
                             } catch (JMSException e) {
                             e.printStackTrace();
@@ -155,7 +154,8 @@ public class ExtJndiTest {
             
             // Block main thread and wait for the message to be received and printed out before exiting
             latch.await();
-            System.exit(0);
+            connection.stop();
+            consumer.close();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -176,10 +176,10 @@ public class ExtJndiTest {
         try {
             ExtJndiTest instance = new ExtJndiTest();
              for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("-jndiURL")) {
+                if (args[i].equals("-jndiUrl")) {
                     i++;
                     if (i >= args.length) instance.printUsage();
-                    instance.jndiURL = args[i];
+                    instance.jndiUrl = args[i];
                 } else if (args[i].equals("-jndiUsername")) {
                     i++;
                     if (i >= args.length) instance.printUsage();
@@ -188,14 +188,14 @@ public class ExtJndiTest {
                     i++;
                     if (i >= args.length) instance.printUsage();
                     instance.jndiPassword = args[i];      
-                } else if (args[i].equals("-jndiCFName")) {
+                } else if (args[i].equals("-cf")) {
                     i++;
                     if (i >= args.length) instance.printUsage();
-                    instance.jndiCFName = args[i];      
-                } else if (args[i].equals("-jndiDestName")) {
+                    instance.cfName = args[i];      
+                } else if (args[i].equals("-destination")) {
                     i++;
                     if (i >= args.length) instance.printUsage();
-                    instance.jndiDestName = args[i];      
+                    instance.destinationName = args[i];      
                 } else {
                     instance.printUsage();
                     System.out.println("Illegal argument specified - " + args[i]);
@@ -203,9 +203,9 @@ public class ExtJndiTest {
                 }
             }
 
-            if (instance.jndiURL == null) {
+            if (instance.jndiUrl == null) {
                 instance.printUsage();
-                System.out.println("Please specify \"-jndiURL\" parameter");
+                System.out.println("Please specify \"-jndiUrl\" parameter");
                 return;
             }
             if (instance.jndiUsername == null) {
@@ -218,14 +218,14 @@ public class ExtJndiTest {
                 System.out.println("Please specify \"-jndiPassword\" parameter");
                 return;
             }
-            if (instance.jndiCFName == null) {
+            if (instance.cfName == null) {
                 instance.printUsage();
-                System.out.println("Please specify \"-jndiCFName\" parameter");
+                System.out.println("Please specify \"-cf\" parameter");
                 return;
             }
-            if (instance.jndiDestName == null) {
+            if (instance.destinationName == null) {
                 instance.printUsage();
-                System.out.println("Please specify \"-jndiDestName\" parameter");
+                System.out.println("Please specify \"-destination\" parameter");
                 return;
             }
 
