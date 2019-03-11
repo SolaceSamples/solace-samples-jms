@@ -112,7 +112,7 @@ message-spool message-vpn "VPNNAME"
 
 ```
 
-*   Properly configure the default message-VPN with the necessary JNDI configuration. This script assumes the JNDI connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below. The script also sets the properties of the JNDI connection factory, which will apply to the connections created when using it. Also notice how the JNDI queue reference is linked to the phisical queue.
+*   Properly configure the default message-VPN with the necessary JNDI configuration. This script assumes the JNDI connection factory and queue do not exist and creates them. If the JNDI connection factory or queue already exists you may need to remove the keyword “create” from the script below. The script also sets the properties of the JNDI connection factory, which will apply to the connections created when using it. Also notice how the JNDI queue reference is linked to the physical queue.
 
 ```
 jndi message-vpn "VPNNAME"
