@@ -54,12 +54,9 @@ public class ExtJndiImport {
 
     // External JNDI Initial Context Factory
     private static final String EXTJNDI_INITIAL_CONTEXT_FACTORY = 
-    // "org.jboss.naming.remote.client.InitialContextFactory";
-    // "org.jnp.interfaces.NamingContextFactory"; 
-    // "com.ibm.websphere.naming.WsnInitialContextFactory";
-    // "com.sun.jndi.ldap.LdapCtxFactory";
     "com.sun.jndi.fscontext.RefFSContextFactory";
-    // "com.sun.jndi.rmi.registry.RegistryContextFactory";
+    // Other provider example for LDAP:
+    // "com.sun.jndi.ldap.LdapCtxFactory";  // LDAP
 
     // Solace parameters
     private String solaceUrl = null;
@@ -159,15 +156,6 @@ public class ExtJndiImport {
             } else if (sourceCfJndiName != null) {
                 // Lookup the connection factory
                 SolConnectionFactory cf = (SolConnectionFactory) solInitialContext.lookup(sourceCfJndiName);
-                cf.setSSLTrustStore("");
-                Iterator<String> it = cf.getPropertyNames().iterator();
-                while (it.hasNext()) {
-                    String name = it.next();
-                    Object effectiveValue = cf.getEffectiveProperty(name);
-                    if (effectiveValue != null) {
-                        cf.setProperty(name, effectiveValue);
-                    }
-                }
                 ref = cf.getReference();
                 System.out.println("Importing connection factory " + sourceCfJndiName + " from Solace JNDI to external JNDI  as " + name );
             }
