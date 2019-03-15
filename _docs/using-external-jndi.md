@@ -223,6 +223,8 @@ Building these examples is simple; you can use Gradle.
 
 This builds all the JMS Getting Started Samples with OS specific launch scripts. The files are staged in the `build/staged` directory.
 
+Note: the file-based JNDI provider jar "fscontext" is included as a Maven dependency in the Gradle build file [build.gradle]{{ /blob/master/build.gradle }}" target="_blank" . Replace this with your JNDI provider jar file's reference. If it is are not available from Maven create a directory "libs" under the project root (same level as the "src" directory) and place the jar file there as the build file has this directory in its source path.
+
 ### Running the Sample
 
 First, ensure that the Solace internal JNDI has been configured as described in the [Obtaining JMS objects using JNDI tutorial]({{ site.baseurl }}/using-jndi#configuring-the-solace-messaging ), so we can assume followings exist:
@@ -275,8 +277,11 @@ $ ./build/staged/bin/extJndiTest -jndiUrl file:///tmp/ \
                                  -jndiPassword password \
                                  -cf ext-cf \
                                  -destination ext-q
+:
+*** Sent Message with content: SolJMSJNDITest message
+*** Received Message with content: SolJMSJNDITest message
+:
 ```
-
 
 You have now successfully imported settings into the external JNDI server, then used it to access the Solace message broker for JMS messaging.
 

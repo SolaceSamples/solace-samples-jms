@@ -270,8 +270,8 @@ public class ExtJndiImport {
                 System.out.println("Please specify \"-operation\" parameter");
                 return;
             }
-            if ((!instance.operation.equals(Operation.BIND)) && (!instance.operation.equals(Operation.REBIND))) {
-                if ((instance.sourceCfJndiName == null) && (instance.sourceQueueJndiName == null) && (instance.sourceTopicJndiName == null)) {
+            if ((instance.operation.equals(Operation.BIND)) || (instance.operation.equals(Operation.REBIND))) {
+                if ((instance.solaceUrl == null) && (instance.solaceUsername == null) && (instance.solacePassword == null)) {
                     instance.printUsage();
                     System.out.println("For BIND or REBIND operation please specify all \"-solaceUrl\", \"-solaceUsername\" and \"-solacePassword\" parameters");
                     return;
