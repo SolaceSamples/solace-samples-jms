@@ -32,7 +32,10 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    compile("com.solacesystems:sol-jms:10.4.0")
+    compile("com.solacesystems:sol-jms:10.5.0")
+    compile("com.sun.messaging.mq:fscontext:4.6-b01")
+    // For any local libs that are not available from mavenCentral
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task createAllStartScripts() << {
@@ -46,10 +49,12 @@ def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
 				 'basicRequestor':'com.solace.samples.BasicRequestor',
 				 'basicReplier':'com.solace.samples.BasicReplier',
 				 'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
-				 'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI'
+				 'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
+				 'extJndiImport':'com.solace.samples.ExtJndiImport',
+				 'extJndiTest':'com.solace.samples.ExtJndiTest'
 ]
   scripts.each() { scriptName, className ->
-          def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
+        def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
         mainClassName = className
         applicationName = scriptName
         outputDir = new File(project.buildDir, 'scripts')
