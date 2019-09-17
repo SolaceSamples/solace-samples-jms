@@ -242,7 +242,7 @@ A Queue or Topic destination is needed to send and receive messages. When using 
 
 Following code will obtain a Queue for the Persistence with Queues scenario:
 
-```
+```java
 final String QUEUE_NAME = "Q/tutorial";
 final String QUEUE_JNDI_NAME = "/JNDI/" + QUEUE_NAME;
 Queue queue = (Queue) initialContext.lookup(QUEUE_JNDI_NAME);
