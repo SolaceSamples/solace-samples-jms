@@ -227,7 +227,7 @@ Note: the file-based JNDI provider jar "fscontext" is included as a Maven depend
 
 ### Running the Sample
 
-First, ensure that the Solace internal JNDI has been configured as described in the [Obtaining JMS objects using JNDI tutorial]({{ site.baseurl }}/using-jndi#configuring-the-solace-messaging ), so we can assume followings exist:
+First, ensure that the Solace internal JNDI has been configured as described in the [Obtaining JMS objects using JNDI tutorial]({{ site.baseurl }}/using-jndi), so we can assume followings exist:
 
 | Solace JNDI ConnectionFactory name | /JNDI/CF/GettingStarted |
 | Solace JNDI Queue name             | /JNDI/Q/tutorial |
