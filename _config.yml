@@ -7,7 +7,7 @@ repository: https://github.com/SolaceSamples/solace-samples-jms
 # Also see _includes/intro.html to customize the description which gets included in index.html.
 
 # Links
-links-community: //solace.com/support/
+links-community: //solace.community
 links-get-started: //solace.com/samples/solace-samples-jms/
 links-downloads: //solace.com/downloads/
 links-tech-other: //solace.com/products/tech/
