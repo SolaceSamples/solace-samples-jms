@@ -24,7 +24,6 @@
 package com.solace.samples;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
