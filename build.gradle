@@ -38,8 +38,10 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-task createAllStartScripts() << {
-     // just a placeholder
+task createAllStartScripts() {
+    doLast {
+        // just a placeholder
+    }
 }
   
 def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
