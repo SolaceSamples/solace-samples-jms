@@ -27,7 +27,6 @@ import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 
 import javax.jms.Connection;
-import javax.jms.ConnectionMetaData;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
