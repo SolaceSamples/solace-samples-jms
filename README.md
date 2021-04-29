@@ -24,7 +24,19 @@ See the individual tutorials for details:
 
 ## Prerequisites
 
-This tutorial requires the Solace JMS API library. Download the JMS API library to your computer from [here](https://solace.com/downloads/).
+This tutorial requires the Solace JMS API library. There are multiple options for getting the Solace JMS API. 
+### Option 1: Download the JMS API library
+Download from [here](https://solace.com/downloads/?fwp_downloads=solace-apis). The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
+
+### Option 2: Using it with Gradle
+`compile("com.solacesystems:sol-jms:10.2.1")`
+
+### Option 3: Using it with Maven
+<dependency>
+   <groupId>com.solacesystems</groupId>
+   <artifactId>sol-jms</artifactId>
+   <version>10.2.1</version>
+</dependency>
 
 ## Build the Samples
 
@@ -82,8 +94,6 @@ This project is licensed under the Apache License, Version 2.0. - See the [LICEN
 
 For more information try these resources:
 
-- [Tutorials](https://tutorials.solace.dev/)
-- The Solace Developer Portal website at: http://dev.solace.com
-- Get a better understanding of [Solace technology](https://solace.com/products/tech/).
-- Check out the [Solace blog](http://dev.solace.com/blog/) for other interesting discussions around Solace technology
-- Ask the [Solace community.](https://solace.community)
+- The Solace Developer Portal website at: https://solace.dev
+- Ask the https://solace.community
+- Solace API Tutorials @ https://tutorials.solace.dev
