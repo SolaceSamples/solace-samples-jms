@@ -32,11 +32,13 @@ Download from [here](https://solace.com/downloads/?fwp_downloads=solace-apis). T
 `compile("com.solacesystems:sol-jms:10.2.1")`
 
 ### Option 3: Using it with Maven
+```
 <dependency>
    <groupId>com.solacesystems</groupId>
    <artifactId>sol-jms</artifactId>
    <version>10.2.1</version>
 </dependency>
+```
 
 ## Build the Samples
 
