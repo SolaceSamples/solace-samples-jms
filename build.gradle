@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    compile("com.solacesystems:sol-jms:10.5.0")
+    compile("com.solacesystems:sol-jms:10.10.0")
     compile("com.sun.messaging.mq:fscontext:4.6-b01")
     // For any local libs that are not available from mavenCentral
     compile fileTree(dir: 'libs', include: ['*.jar'])
