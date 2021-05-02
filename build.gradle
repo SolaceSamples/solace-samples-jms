@@ -62,36 +62,46 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-task createAllStartScripts() {
-    doLast {
-        // just a placeholder
-    }
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            exclude '**/DirectProcessor.java'
+       }
+   }
 }
-  
-def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
-				 'topicSubscriber':'com.solace.samples.TopicSubscriber',
-				 'queueProducer':'com.solace.samples.QueueProducer',
-				 'queueConsumer':'com.solace.samples.QueueConsumer',
-				 'basicRequestor':'com.solace.samples.BasicRequestor',
-				 'basicReplier':'com.solace.samples.BasicReplier',
-				 'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
-				 'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
-				 'extJndiImport':'com.solace.samples.ExtJndiImport',
-				 'extJndiTest':'com.solace.samples.ExtJndiTest'
+
+def scripts = [
+    'HelloWorld':'com.solace.samples.jms.HelloWorld',
+    'DirectProcessor':'com.solace.samples.jms.patterns.DirectProcessor',
+    'DirectPublisher':'com.solace.samples.jms.patterns.DirectPublisher',
+    'DirectSubscriber':'com.solace.samples.jms.patterns.DirectSubscriber',
+    'DirectReplier':'com.solace.samples.jms.patterns.DirectReplier',
+    'topicPublisher': 'com.solace.samples.TopicPublisher',
+    'topicSubscriber':'com.solace.samples.TopicSubscriber',
+    'queueProducer':'com.solace.samples.QueueProducer',
+    'queueConsumer':'com.solace.samples.QueueConsumer',
+    'basicRequestor':'com.solace.samples.BasicRequestor',
+    'basicReplier':'com.solace.samples.BasicReplier',
+    'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
+    'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
+    'extJndiImport':'com.solace.samples.ExtJndiImport',
+    'extJndiTest':'com.solace.samples.ExtJndiTest'
 ]
-  scripts.each() { scriptName, className ->
+
+scripts.each() { scriptName, className ->
         def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
         mainClassName = className
         applicationName = scriptName
         outputDir = new File(project.buildDir, 'scripts')
         classpath = jar.outputs.files + project.configurations.runtimeClasspath
     }
-      applicationDistribution.into("bin") {
-            from(t)
-            fileMode = 0755
-			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    applicationDistribution.into("bin") {
+        from(t)
+        fileMode = 0755
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
-    createAllStartScripts.dependsOn(t)
+    //createAllStartScripts.dependsOn(t)
 }
 
 installDist {

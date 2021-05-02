@@ -28,14 +28,14 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
-import javax.jms.Topic;
 
 /** This is a more detailed subscriber sample. */
 public class DirectSubscriber {
 
     private static final String SAMPLE_NAME = DirectSubscriber.class.getSimpleName();
     private static final String TOPIC_PREFIX = "solace/samples/";  // used as the topic "root"
-
+    private static final String API = "JMS";
+    
     private static volatile int msgRecvCounter = 0;              // num messages received
     private static volatile boolean hasDetectedDiscard = false;  // detected any discards yet?
     private static volatile boolean isShutdown = false;          // are we done yet?
@@ -47,7 +47,7 @@ public class DirectSubscriber {
             System.out.printf("Usage: %s <host:port> <message-vpn> <client-username> [password]%n%n", SAMPLE_NAME);
             System.exit(-1);
         }
-        System.out.println(SAMPLE_NAME + " initializing...");
+        System.out.println(API + " " + SAMPLE_NAME + " initializing...");
 
         // Programmatically create the connection factory using default settings
         SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
@@ -60,11 +60,11 @@ public class DirectSubscriber {
         connectionFactory.setReconnectRetries(2);       // recommended settings
         connectionFactory.setConnectRetriesPerHost(2);  // recommended settings
         // https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Configuring-Connection-T.htm
+        connectionFactory.setClientID(API+"_"+SAMPLE_NAME);  // change the name, easier to find
         Connection connection = connectionFactory.createConnection();
 
         connection.setExceptionListener(jmsException -> {  // ExceptionListener.onException()
-            System.out.println("### Caught this: "+jmsException.toString());
-            System.out.println("### "+jmsException.getMessage());
+            System.out.println("### Connection ExceptionListener caught this: "+jmsException);
             if (jmsException.getMessage().contains("JCSMPTransportException")) {
                 isShutdown = true;  // bail out
             }
@@ -73,8 +73,8 @@ public class DirectSubscriber {
         Session session = connection.createSession(false,Session.CLIENT_ACKNOWLEDGE);  // ACK mode doesn't matter for Direct only
 
         // Create the subscription topic programmatically, & the message consumer for the subscription topic
-        MessageConsumer messageConsumer = session.createConsumer(session.createTopic(TOPIC_PREFIX + "*/direct/>"));
-        messageConsumer.setMessageListener(new MessageListener() {
+        MessageConsumer consumer = session.createConsumer(session.createTopic(TOPIC_PREFIX + "*/direct/>"));
+        consumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
                 // do not print anything to console... too slow!
@@ -96,7 +96,7 @@ public class DirectSubscriber {
         MessageConsumer messageConsumer2 = session.createConsumer(session.createTopic(TOPIC_PREFIX + "control/>"));
         messageConsumer2.setMessageListener(message -> {  // lambda, MessageListener.onMessage(message)
             try {
-                if (((Topic)message.getJMSDestination()).getTopicName().endsWith("control/quit")) {
+                if (message.getJMSDestination().toString().endsWith("control/quit")) {
                     System.out.println(">>> QUIT message received, shutting down.");  // example of command-and-control w/msgs
                     isShutdown = true;
                 }
@@ -106,11 +106,11 @@ public class DirectSubscriber {
 
         connection.start();
 
-        System.out.println(SAMPLE_NAME + " connected, and running. Press [ENTER] to quit.");
+        System.out.println(API + " " + SAMPLE_NAME + " connected, and running. Press [ENTER] to quit.");
         try {
             while (System.in.available() == 0 && !isShutdown) {
                 Thread.sleep(1000);  // wait 1 second
-                System.out.printf("Received msgs/s: %,d%n",msgRecvCounter);  // simple way of calculating message rates
+                System.out.printf("%s Received msgs/s: %,d%n",API,msgRecvCounter);  // simple way of calculating message rates
                 msgRecvCounter = 0;
                 if (hasDetectedDiscard) {
                     System.out.println("*** Egress discard detected *** : "
