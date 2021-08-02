@@ -35,9 +35,9 @@ import javax.jms.Session;
 /**
  * A more performant sample that shows an application that publishes.
  */
-public class DirectPublisher {
+public class NonPersistentPublisher {
     
-    private static final String SAMPLE_NAME = DirectPublisher.class.getSimpleName();
+    private static final String SAMPLE_NAME = NonPersistentPublisher.class.getSimpleName();
     private static final String TOPIC_PREFIX = "solace/samples/";  // used as the topic "root"
     private static final String API = "JMS";
     private static final int APPROX_MSG_RATE_PER_SEC = 100;
@@ -62,10 +62,10 @@ public class DirectPublisher {
         if (args.length > 3) {
             connectionFactory.setPassword(args[3]);  // client-password
         }
-        connectionFactory.setReconnectRetries(20);       // recommended settings
+        connectionFactory.setReconnectRetries(20);      // recommended settings
         connectionFactory.setConnectRetriesPerHost(5);  // recommended settings
         // https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Configuring-Connection-T.htm
-        connectionFactory.setDirectTransport(true);     // use Direct transport for "non-persistent" messages
+        connectionFactory.setDirectTransport(false);    // use Guaranteed transport for "non-persistent" messages
         connectionFactory.setXmlPayload(false);         // use the normal payload section for TextMessage
         connectionFactory.setClientID(API+"_"+SAMPLE_NAME);  // change the name, easier to find
         Connection connection = connectionFactory.createConnection();
@@ -97,24 +97,20 @@ public class DirectPublisher {
                     message.writeBytes(payload);
                     message.setJMSMessageID(UUID.randomUUID().toString());  // as an example of a header
                     // dynamic topics!!  "solace/samples/jms/direct/pub/A"
-                    String topicString = new StringBuilder(TOPIC_PREFIX).append(API.toLowerCase())
-                            .append("/direct/pub/").append(chosenCharacter).toString();
+                    String topicString = new StringBuilder(TOPIC_PREFIX)
+                            .append(API.toLowerCase()).append("/direct/pub/").append(chosenCharacter).toString();
                     producer.send(session.createTopic(topicString),message);  // send the message
                     msgSentCounter++;  // add one
                     message.clearBody();  // re-use the message
+                    Thread.sleep(1000 / APPROX_MSG_RATE_PER_SEC);  // do Thread.sleep(0) for max speed
+                    // Note: STANDARD Edition Solace PubSub+ broker is limited to 10k msg/s max ingress
                 } catch (JMSException e) {  // threw from send(), only thing that is throwing here, but keep trying (unless shutdown?)
                     System.out.printf("### Caught while trying to producer.send(): %s%n",e);
 //                    if (e instanceof JCSMPTransportException) {  // unrecoverable
 //                        isShutdown = true;
 //                    }
-                } finally {  // add a delay between messages
-                    try {
-                        //Thread.sleep(0);
-                        Thread.sleep(1000 / APPROX_MSG_RATE_PER_SEC);  // do Thread.sleep(0) for max speed
-                        // Note: STANDARD Edition Solace PubSub+ broker is limited to 10k msg/s max ingress
-                    } catch (InterruptedException e) {
-                        isShutdown = true;
-                    }
+                } catch (InterruptedException e) {
+                    isShutdown = true;
                 }
             }
             try {  // try to send a QUIT message to the other applications... (as an example of command-and-control)

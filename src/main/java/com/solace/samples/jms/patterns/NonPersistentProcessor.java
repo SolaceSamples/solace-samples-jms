@@ -39,9 +39,9 @@ import javax.jms.Topic;
  * This class is meant to be used with DirectPub and DirectSub, intercepting the published messages and
  * sending them on to a different topic.
  */
-public class DirectProcessor {
+public class NonPersistentProcessor {
 
-    private static final String SAMPLE_NAME = DirectProcessor.class.getSimpleName();
+    private static final String SAMPLE_NAME = NonPersistentProcessor.class.getSimpleName();
     private static final String TOPIC_PREFIX = "solace/samples/";  // used as the topic "root"
     private static final String API = "JMS";
     
@@ -66,7 +66,7 @@ public class DirectProcessor {
         connectionFactory.setReconnectRetries(2);       // recommended settings
         connectionFactory.setConnectRetriesPerHost(2);  // recommended settings
         // https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Configuring-Connection-T.htm
-        connectionFactory.setDirectTransport(true);     // use Direct transport for "non-persistent" messages
+        connectionFactory.setDirectTransport(false);    // use Direct transport for "non-persistent" messages
         connectionFactory.setXmlPayload(false);         // use the normal payload section for TextMessage
         connectionFactory.setClientID(API+"_"+SAMPLE_NAME);  // change the name, easier to find
         Connection connection = connectionFactory.createConnection();

@@ -67,6 +67,7 @@ public class HelloWorld {
         if (args.length > 3) {
             connectionFactory.setPassword(args[3]);  // client-password
         }
+        connectionFactory.setDirectTransport(false);     // use Guaranteed transport for "non-persistent" messages
         connectionFactory.setXmlPayload(false);  // use the normal payload section for TextMessage
         connectionFactory.setClientID(API+"_"+SAMPLE_NAME);  // change the name, easier to find
         Connection connection = connectionFactory.createConnection();
@@ -99,7 +100,7 @@ public class HelloWorld {
                 message.setText(String.format("Hello World from %s!",uniqueName));
                 // make a dynamic topic: solace/samples/jms/hello/[uniqueName]
                 String topicString = TOPIC_PREFIX + API.toLowerCase() + "/hello/" + uniqueName.toLowerCase();
-                System.out.printf(">> Calling send() on %s%n",topicString);
+                System.out.printf(">> Calling send() on '%s'%n",topicString);
                 producer.send(session.createTopic(topicString), message);
                 message.clearBody();     // reuse this message on the next loop, to avoid having to recreate it
             } catch (JMSException e) {

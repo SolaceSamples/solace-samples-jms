@@ -30,9 +30,9 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 
 /** This is a more detailed subscriber sample. */
-public class DirectSubscriber {
+public class NonPersistentSubscriber {
 
-    private static final String SAMPLE_NAME = DirectSubscriber.class.getSimpleName();
+    private static final String SAMPLE_NAME = NonPersistentSubscriber.class.getSimpleName();
     private static final String TOPIC_PREFIX = "solace/samples/";  // used as the topic "root"
     private static final String API = "JMS";
     
@@ -60,6 +60,7 @@ public class DirectSubscriber {
         connectionFactory.setReconnectRetries(2);       // recommended settings
         connectionFactory.setConnectRetriesPerHost(2);  // recommended settings
         // https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Configuring-Connection-T.htm
+        connectionFactory.setDirectTransport(false);    // use Guaranteed transport for "non-persistent" messages
         connectionFactory.setClientID(API+"_"+SAMPLE_NAME);  // change the name, easier to find
         Connection connection = connectionFactory.createConnection();
 
