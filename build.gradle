@@ -15,59 +15,93 @@ distTar.enabled=false
 distZip.enabled=false
 
 applicationName = 'solace-samples-jms'
-version = ''
+//version = ''
 
 jar {
-	baseName = 'solace-samples-jms'
-    version =  version
+    archiveBaseName = 'solace-samples-jms'
+    archiveVersion = ''
     manifest {
         attributes 'Implementation-Title': 'Solace Getting Started Samples',
-                   'Implementation-Version': version
+                   'Implementation-Version': ''
+    }
+}
+
+// Download context sensitive help and/or source code for eclipse and idea
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+    jdt {
+        //if you want to alter the java versions (by default they are configured with gradle java plugin settings):
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    compile("com.solacesystems:sol-jms:10.5.0")
-    compile("com.sun.messaging.mq:fscontext:4.6-b01")
+    implementation("com.solacesystems:sol-jms:10.10.0")
+    //implementation("com.sun.messaging.mq:fscontext:4.6-b01")
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.11.1'
     // For any local libs that are not available from mavenCentral
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-task createAllStartScripts() {
-    doLast {
-        // just a placeholder
-    }
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            exclude '**/DirectProcessor.java'
+       }
+   }
 }
-  
-def scripts = [ 'topicPublisher':'com.solace.samples.TopicPublisher',
-				 'topicSubscriber':'com.solace.samples.TopicSubscriber',
-				 'queueProducer':'com.solace.samples.QueueProducer',
-				 'queueConsumer':'com.solace.samples.QueueConsumer',
-				 'basicRequestor':'com.solace.samples.BasicRequestor',
-				 'basicReplier':'com.solace.samples.BasicReplier',
-				 'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
-				 'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
-				 'extJndiImport':'com.solace.samples.ExtJndiImport',
-				 'extJndiTest':'com.solace.samples.ExtJndiTest'
+
+def scripts = [
+    'HelloWorld':'com.solace.samples.jms.HelloWorld',
+    'DirectProcessor':'com.solace.samples.jms.patterns.DirectProcessor',
+    'DirectPublisher':'com.solace.samples.jms.patterns.DirectPublisher',
+    'DirectSubscriber':'com.solace.samples.jms.patterns.DirectSubscriber',
+    'DirectReplier':'com.solace.samples.jms.patterns.DirectReplier',
+    'topicPublisher': 'com.solace.samples.TopicPublisher',
+    'topicSubscriber':'com.solace.samples.TopicSubscriber',
+    'queueProducer':'com.solace.samples.QueueProducer',
+    'queueConsumer':'com.solace.samples.QueueConsumer',
+    'basicRequestor':'com.solace.samples.BasicRequestor',
+    'basicReplier':'com.solace.samples.BasicReplier',
+    'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
+    'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
+    'extJndiImport':'com.solace.samples.ExtJndiImport',
+    'extJndiTest':'com.solace.samples.ExtJndiTest'
 ]
-  scripts.each() { scriptName, className ->
+
+scripts.each() { scriptName, className ->
         def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
         mainClassName = className
         applicationName = scriptName
         outputDir = new File(project.buildDir, 'scripts')
-        classpath = jar.outputs.files + project.configurations.runtime
+        classpath = jar.outputs.files + project.configurations.runtimeClasspath
     }
-      applicationDistribution.into("bin") {
-            from(t)
-            fileMode = 0755
-			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    applicationDistribution.into("bin") {
+        from(t)
+        fileMode = 0755
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
-    createAllStartScripts.dependsOn(t)
+    //createAllStartScripts.dependsOn(t)
 }
 
 installDist {

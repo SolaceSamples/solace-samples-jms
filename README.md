@@ -29,14 +29,15 @@ This tutorial requires the Solace JMS API library. There are multiple options fo
 Download from [here](https://solace.com/downloads/?fwp_downloads=solace-apis). The JMS API is distributed as a zip file containing the required jars, API documentation, and examples.
 
 ### Option 2: Using it with Gradle
-`compile("com.solacesystems:sol-jms:10.2.1")`
+`implementation("com.solacesystems:sol-jms:10.10.0")`
+or `implementation group: 'com.solacesystems', name: 'sol-jms', version: '10.10.0'`
 
 ### Option 3: Using it with Maven
 ```
 <dependency>
    <groupId>com.solacesystems</groupId>
    <artifactId>sol-jms</artifactId>
-   <version>10.2.1</version>
+   <version>10.10.0</version>
 </dependency>
 ```
 
