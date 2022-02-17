@@ -53,7 +53,7 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    implementation("com.solacesystems:sol-jms:10.10.0")
+    implementation("com.solacesystems:sol-jms:10.13.0")
     //implementation("com.sun.messaging.mq:fscontext:4.6-b01")
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
