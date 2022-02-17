@@ -38,14 +38,14 @@ public class HowToCreateAConnectionForOAuth {
   final static String SOLJMS_INITIAL_CONTEXT_FACTORY = "com.solacesystems.jndi.SolJNDIInitialContextFactory";
   final static String CONNECTION_FACTORY_JNDI_NAME = "/JNDI/CF/GettingStarted";
 
-  public static Connection createJmsConnectionWithOauth(String jndiProviderURL,String myAccessToken,String issuerIdentifiereURL) throws NamingException,JMSException
+  public static Connection createJmsConnectionWithOauth(String jndiProviderURL,String myAccessToken,String issuerIdentifierURL) throws NamingException,JMSException
   {
     Hashtable<String, Object> env = new Hashtable<String, Object>();
     env.put(InitialContext.INITIAL_CONTEXT_FACTORY, SOLJMS_INITIAL_CONTEXT_FACTORY);
     env.put(InitialContext.PROVIDER_URL, jndiProviderURL);
     env.put(SupportedProperty.SOLACE_JMS_AUTHENTICATION_SCHEME, SupportedProperty.AUTHENTICATION_SCHEME_OAUTH2);
     env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ACCESS_TOKEN, myAccessToken);
-    env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ISSUER_IDENTIFIER, issuerIdentifiereURL);
+    env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ISSUER_IDENTIFIER, issuerIdentifierURL);
     // Other Properties
     // Create InitialContext.
     final InitialContext  initialContext = new InitialContext(env);
