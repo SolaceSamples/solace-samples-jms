@@ -72,10 +72,9 @@ sourceSets {
 
 def scripts = [
     'HelloWorld':'com.solace.samples.jms.HelloWorld',
-    'DirectProcessor':'com.solace.samples.jms.patterns.DirectProcessor',
-    'DirectPublisher':'com.solace.samples.jms.patterns.DirectPublisher',
-    'DirectSubscriber':'com.solace.samples.jms.patterns.DirectSubscriber',
-    'DirectReplier':'com.solace.samples.jms.patterns.DirectReplier',
+    'NonPersistentProcessor':'com.solace.samples.jms.patterns.NonPersistentProcessor',
+    'NonPersistentPublisher':'com.solace.samples.jms.patterns.NonPersistentPublisher',
+    'NonPersistentSubscriber':'com.solace.samples.jms.patterns.NonPersistentSubscriber',
     'topicPublisher': 'com.solace.samples.TopicPublisher',
     'topicSubscriber':'com.solace.samples.TopicSubscriber',
     'queueProducer':'com.solace.samples.QueueProducer',
