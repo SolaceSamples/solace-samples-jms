@@ -48,16 +48,15 @@ idea {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    implementation("com.solacesystems:sol-jms:10.13.0")
+    implementation('com.solacesystems:sol-jms:10.13.1')
     //implementation("com.sun.messaging.mq:fscontext:4.6-b01")
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.11.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.17.1'
     // For any local libs that are not available from mavenCentral
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
@@ -73,10 +72,9 @@ sourceSets {
 
 def scripts = [
     'HelloWorld':'com.solace.samples.jms.HelloWorld',
-    'DirectProcessor':'com.solace.samples.jms.patterns.DirectProcessor',
-    'DirectPublisher':'com.solace.samples.jms.patterns.DirectPublisher',
-    'DirectSubscriber':'com.solace.samples.jms.patterns.DirectSubscriber',
-    'DirectReplier':'com.solace.samples.jms.patterns.DirectReplier',
+    'NonPersistentProcessor':'com.solace.samples.jms.patterns.NonPersistentProcessor',
+    'NonPersistentPublisher':'com.solace.samples.jms.patterns.NonPersistentPublisher',
+    'NonPersistentSubscriber':'com.solace.samples.jms.patterns.NonPersistentSubscriber',
     'topicPublisher': 'com.solace.samples.TopicPublisher',
     'topicSubscriber':'com.solace.samples.TopicSubscriber',
     'queueProducer':'com.solace.samples.QueueProducer',
@@ -91,7 +89,7 @@ def scripts = [
 
 scripts.each() { scriptName, className ->
         def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
-        mainClassName = className
+        mainClass = className
         applicationName = scriptName
         outputDir = new File(project.buildDir, 'scripts')
         classpath = jar.outputs.files + project.configurations.runtimeClasspath
