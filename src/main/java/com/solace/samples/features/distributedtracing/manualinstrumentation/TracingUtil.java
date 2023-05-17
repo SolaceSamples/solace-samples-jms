@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.solace.samples.features.opentelemetry.manualinstrumentation;
+package com.solace.samples.features.distributedtracing.manualinstrumentation;
 
 import com.solace.opentelemetry.javaagent.jms.SolaceJmsContextPropagator;
 import io.opentelemetry.api.common.Attributes;

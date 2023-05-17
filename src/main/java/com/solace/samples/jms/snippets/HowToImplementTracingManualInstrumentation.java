@@ -41,7 +41,7 @@ import javax.jms.Topic;
  * Example how to manually instrument Solace JMS publisher and receiver. All examples assume usage
  * of a newer Solace JMS API v10.18.0 or newer.
  */
-public class HowToImplementManualInstrumentation {
+public class HowToImplementTracingManualInstrumentation {
 
 
   /**

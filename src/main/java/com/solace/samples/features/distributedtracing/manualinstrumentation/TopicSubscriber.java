@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.solace.samples.features.opentelemetry.manualinstrumentation;
+package com.solace.samples.features.distributedtracing.manualinstrumentation;
 
 import com.solace.opentelemetry.javaagent.jms.SolaceJmsW3CTextMapGetter;
 import com.solacesystems.jms.SolConnectionFactory;
@@ -38,24 +38,24 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.Topic;
 
 /**
- * Subscribes to message published to a Queue using Solace JMS 1.1 API implementation.
+ * Subscribes to message published to a topic using Solace JMS 1.1 API implementation.
  * <p>
  * Setup a Solace PubSub+ Broker and OpenTelemetry Collector as per tutorial  >
  * https://codelabs.solace.dev/codelabs/dt-otel/index.html
  * <p>
  * This is the Subscriber in the Publish-Subscribe messaging pattern.
  */
-public class QueueSubscriber {
+public class TopicSubscriber {
 
-  private static final String QUEUE_NAME = "solace/tracing";
-  private static final String SERVICE_NAME = "SolaceJMSQueueSubscriberManualInstrument";
+  private static final String TOPIC_NAME = "solace/samples/jms/direct/pub/tracing";
+  private static final String SERVICE_NAME = "SolaceJMSTopicSubscriberManualInstrument";
 
   // Latch used for synchronizing between threads
-  final CountDownLatch latch = new CountDownLatch(1);
+  private final CountDownLatch latch = new CountDownLatch(1);
 
   static {
     //Setup OpenTelemetry
@@ -70,7 +70,7 @@ public class QueueSubscriber {
     final String username = split[0];
     final String password = args[2];
 
-    log("QueueSubscriber is connecting to Solace messaging at %s...%n", host);
+    log("TopicSubscriber is connecting to Solace messaging at %s...%n", host);
 
     // Programmatically create the connection factory using default settings
     final SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
@@ -80,7 +80,7 @@ public class QueueSubscriber {
     connectionFactory.setPassword(password);
 
     // Enables persistent queues or topic endpoints to be created dynamically
-    // on the router, used when Session.createQueue() is called below
+    // on the router, used when Session.createTopic() is called below
     connectionFactory.setDynamicDurables(true);
 
     try (final Connection connection = connectionFactory.createConnection()) {
@@ -89,11 +89,10 @@ public class QueueSubscriber {
 
       log("Connected to Solace Message VPN '%s' with client username '%s'.%n", vpnName, username);
 
-      // Create the queue programmatically and the corresponding router resource
-      // will also be created dynamically because DynamicDurables is enabled.
-      final Queue messageDestination = session.createQueue(QUEUE_NAME);
+      // Create the subscription topic programmatically
+      final Topic messageDestination = session.createTopic(TOPIC_NAME);
 
-      // From the session, create a consumer for the destination.
+      // Create the message consumer for the subscription topic
       final MessageConsumer messageConsumer = session.createConsumer(messageDestination);
 
       final OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
@@ -123,7 +122,7 @@ public class QueueSubscriber {
   }
 
   void traceAndProcess(Message receivedMessage, Consumer<Message> messageProcessor,
-      Queue messageDestination, OpenTelemetry openTelemetry, Tracer tracer) {
+      Topic messageDestination, OpenTelemetry openTelemetry, Tracer tracer) {
 
     //Extract tracing context from message, if any using the SolaceJmsW3CTextMapGetter
     final SolaceJmsW3CTextMapGetter getter = new SolaceJmsW3CTextMapGetter();
@@ -138,9 +137,9 @@ public class QueueSubscriber {
           .setSpanKind(SpanKind.CLIENT)
           .setAttribute(SemanticAttributes.MESSAGING_SYSTEM, "SolacePubSub+")
           .setAttribute(SemanticAttributes.MESSAGING_OPERATION, MessagingOperationValues.PROCESS)
-          .setAttribute(SemanticAttributes.MESSAGING_DESTINATION, messageDestination.getQueueName())
+          .setAttribute(SemanticAttributes.MESSAGING_DESTINATION, messageDestination.getTopicName())
           .setAttribute(SemanticAttributes.MESSAGING_DESTINATION_KIND,
-              MessagingDestinationKindValues.QUEUE)
+              MessagingDestinationKindValues.TOPIC)
           .setAttribute(SemanticAttributes.MESSAGING_TEMP_DESTINATION, false)
           // creates a parent child relationship to a message publisher's application span if any
           .setParent(extractedContext)
@@ -159,7 +158,7 @@ public class QueueSubscriber {
   public static void main(String... args) throws Exception {
     // Check command line arguments
     if (args.length != 3 || args[1].split("@").length != 2) {
-      log("Usage: QueueConsumer <host:port> <client-username@message-vpn> <client-password>");
+      log("Usage: TopicSubscriber <host:port> <client-username@message-vpn> <client-password>");
       log("");
       System.exit(-1);
     }
@@ -173,7 +172,7 @@ public class QueueSubscriber {
       log("");
       System.exit(-1);
     }
-    final QueueSubscriber subscriber = new QueueSubscriber();
+    final TopicSubscriber subscriber = new TopicSubscriber();
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try {
         Thread.sleep(100);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.solace.samples.features.opentelemetry.manualinstrumentation;
+package com.solace.samples.features.distributedtracing.manualinstrumentation;
 
 import com.solace.opentelemetry.javaagent.jms.SolaceJmsW3CTextMapGetter;
 import com.solacesystems.jms.SolConnectionFactory;
@@ -49,10 +49,10 @@ import javax.jms.Topic;
  * <p>
  * This is the Subscriber in the Publish-Subscribe messaging pattern.
  */
-public class TopicSubscriber {
+public class TopicSyncReceiver {
 
-  private static final String TOPIC_NAME = "T/solace/tracing";
-  private static final String SERVICE_NAME = "SolaceJMSTopicSubscriberManualInstrument";
+  private static final String TOPIC_NAME = "solace/samples/jms/direct/pub/tracing";
+  private static final String SERVICE_NAME = "SolaceJMSTopicSyncSubscriberManualInstrument";
 
   // Latch used for synchronizing between threads
   private final CountDownLatch latch = new CountDownLatch(1);
@@ -70,7 +70,7 @@ public class TopicSubscriber {
     final String username = split[0];
     final String password = args[2];
 
-    log("TopicSubscriber is connecting to Solace messaging at %s...%n", host);
+    log("TopicSyncReceiver is connecting to Solace messaging at %s...%n", host);
 
     // Programmatically create the connection factory using default settings
     final SolConnectionFactory connectionFactory = SolJmsUtility.createConnectionFactory();
@@ -94,6 +94,8 @@ public class TopicSubscriber {
 
       // Create the message consumer for the subscription topic
       final MessageConsumer messageConsumer = session.createConsumer(messageDestination);
+      // Start receiving messages
+      connection.start();
 
       final OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
       final Tracer tracer = openTelemetry.getTracer(SERVICE_NAME);
@@ -103,18 +105,16 @@ public class TopicSubscriber {
         log("New message received:%n%s%n", SolJmsUtility.dumpMessage(message));
       };
 
-      // Use the anonymous inner class for receiving messages asynchronously
-      messageConsumer.setMessageListener(message -> {
-        traceAndProcess(message, consoleLogger, messageDestination, openTelemetry, tracer);
-        latch.countDown();
-      });
+      // Receiving messages synchronously
+      final Message message = messageConsumer.receive();
+      try {
+        if (message != null) {
+          traceAndProcess(message, consoleLogger, messageDestination, openTelemetry, tracer);
+        }
+      } finally {
+        latch.countDown(); // unblock the main thread
+      }
 
-      // Start receiving messages
-      connection.start();
-      log("Awaiting message...");
-
-      // the main thread blocks at the next statement until a message received
-      latch.await();
       connection.stop();
       messageConsumer.close();
       session.close();
@@ -158,7 +158,7 @@ public class TopicSubscriber {
   public static void main(String... args) throws Exception {
     // Check command line arguments
     if (args.length != 3 || args[1].split("@").length != 2) {
-      log("Usage: TopicSubscriber <host:port> <client-username@message-vpn> <client-password>");
+      log("Usage: TopicSyncReceiver <host:port> <client-username@message-vpn> <client-password>");
       log("");
       System.exit(-1);
     }
@@ -172,7 +172,7 @@ public class TopicSubscriber {
       log("");
       System.exit(-1);
     }
-    final TopicSubscriber subscriber = new TopicSubscriber();
+    final TopicSyncReceiver subscriber = new TopicSyncReceiver();
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try {
         Thread.sleep(100);

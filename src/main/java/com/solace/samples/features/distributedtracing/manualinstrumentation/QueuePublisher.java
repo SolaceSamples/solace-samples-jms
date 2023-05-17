@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.solace.samples.features.opentelemetry.manualinstrumentation;
+package com.solace.samples.features.distributedtracing.manualinstrumentation;
 
 import com.solace.opentelemetry.javaagent.jms.SolaceJmsW3CTextMapSetter;
 import com.solacesystems.jms.SolConnectionFactory;
@@ -37,9 +37,9 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
 
 /**
  * Sends a persistent message to a queue using Solace JMS API implementation.
@@ -47,12 +47,12 @@ import javax.jms.Topic;
  * Setup a Solace PubSub+ Broker and OpenTelemetry Collector as per tutorial  >
  * https://codelabs.solace.dev/codelabs/dt-otel/index.html
  * <p>
- * This is the Publisher in the Publish-Subscribe messaging pattern.
+ * The queue used for messages must have been created on the message broker.
  */
-public class TopicPublisher {
+public class QueuePublisher {
 
-  final String TOPIC_NAME = "T/solace/tracing";
-  private static final String SERVICE_NAME = "SolaceJMSTopicPublisherManualInstrument";
+  private static final String QUEUE_NAME = "solace/tracing";
+  private static final String SERVICE_NAME = "SolaceJMSQueuePublisherManualInstrument";
 
   static {
     //Setup OpenTelemetry
@@ -80,10 +80,10 @@ public class TopicPublisher {
       log("Connected to the Solace Message VPN '%s' with client username '%s'.%n", vpnName,
           username);
 
-      // Create the publishing topic programmatically
-      final Topic messageDestination = session.createTopic(TOPIC_NAME);
+      // Create the publishing queue programmatically
+      final Queue messageDestination = session.createQueue(QUEUE_NAME);
 
-      // Create the message producer for the created topic
+      // Create the message producer for the created queue
       final MessageProducer messageProducer = session.createProducer(messageDestination);
 
       final TextMessage message = session.createTextMessage("Hello world!");
@@ -94,8 +94,8 @@ public class TopicPublisher {
       message.setStringProperty("property1", "hello");
       message.setStringProperty("property2", "world");
 
-      log("Sending message '%s' to topic '%s'...%n", message.getText(),
-          messageDestination.getTopicName());
+      log("Sending message '%s' to queue '%s'...%n", message.getText(),
+          messageDestination.getQueueName());
 
       traceAndPublish(message, messageProducer, messageDestination, openTelemetry, tracer);
 
@@ -105,7 +105,7 @@ public class TopicPublisher {
     Thread.sleep(5000);
   }
 
-  void traceAndPublish(Message message, MessageProducer messageProducer, Topic messageDestination,
+  void traceAndPublish(Message message, MessageProducer messageProducer, Queue messageDestination,
       OpenTelemetry openTelemetry, Tracer tracer) throws JMSException {
     final Span sendSpan = tracer
         .spanBuilder("mySolacePublisherApp > send")
@@ -113,9 +113,9 @@ public class TopicPublisher {
         // Optional: user defined Span attributes
         .setAttribute(SemanticAttributes.MESSAGING_SYSTEM, "SolacePubSub+")
         .setAttribute(SemanticAttributes.MESSAGING_OPERATION, "send")
-        .setAttribute(SemanticAttributes.MESSAGING_DESTINATION, messageDestination.getTopicName())
+        .setAttribute(SemanticAttributes.MESSAGING_DESTINATION, messageDestination.getQueueName())
         .setAttribute(SemanticAttributes.MESSAGING_DESTINATION_KIND,
-            MessagingDestinationKindValues.TOPIC)
+            MessagingDestinationKindValues.QUEUE)
         .setAttribute(SemanticAttributes.MESSAGING_TEMP_DESTINATION, false)
         .setParent(Context.current()) // set current context as parent
         .startSpan();
@@ -138,7 +138,7 @@ public class TopicPublisher {
   public static void main(String... args) throws Exception {
     // Check command line arguments
     if (args.length != 3 || args[1].split("@").length != 2) {
-      log("Usage: TopicPublisher <host:port> <client-username@message-vpn> <client-password>");
+      log("Usage: QueuePublisher <host:port> <client-username@message-vpn> <client-password>");
       log("");
       System.exit(-1);
     }
@@ -153,7 +153,7 @@ public class TopicPublisher {
       System.exit(-1);
     }
 
-    new TopicPublisher().run(args);
+    new QueuePublisher().run(args);
   }
 
   private static void log(String logMsg) {
