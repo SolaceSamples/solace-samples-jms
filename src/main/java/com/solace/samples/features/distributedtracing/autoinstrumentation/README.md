@@ -1,2 +1,1 @@
-
-* [Solace JMS OpenTelemetry Auto Instrumentation Code Lab](https://codelabs.solace.dev/codelabs/dt-otel/index.html)
+Auto Instrumentation of Open Telemetry is available with JMS. To learn more how to do that please see the "Auto Instrumentation" section of the [Getting Started with Solace Distributed Tracing and Context Propagation](https://codelabs.solace.dev/codelabs/dt-otel/index.html#15) codelab. 
