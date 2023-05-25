@@ -15,12 +15,13 @@ This repository contains code and matching tutorial walk throughs for basic Sola
 
 See the individual tutorials for details:
 
-- [Publish/Subscribe](https://dev.solace.com/samples/solace-samples-jms/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
-- [Persistence](https://dev.solace.com/samples/solace-samples-jms/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
-- [Request/Reply](https://dev.solace.com/samples/solace-samples-jms/request-reply): Learn how to set up request/reply messaging.
-- [Confirmed Delivery](https://dev.solace.com/samples/solace-samples-jms/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
-- [Topic to Queue Mapping](https://dev.solace.com/samples/solace-samples-jms/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
-- [Obtaining JMS objects using JNDI](https://dev.solace.com/samples/solace-samples-jms/using-jndi): Learn how to use JNDI as a way to create JMS objects.
+- [Publish/Subscribe](https://tutorials.solace.dev/jms/publish-subscribe/): Learn how to set up pub/sub messaging on a Solace VMR.
+- [Persistence](https://tutorials.solace.dev/jms/persistence-with-queues/): Learn how to set up persistence for guaranteed delivery.
+- [Request/Reply](https://tutorials.solace.dev/jms/request-reply/): Learn how to set up request/reply messaging.
+- [Confirmed Delivery](https://tutorials.solace.dev/jms/confirmed-delivery/): Learn how to confirm that your messages are received by a Solace message router.
+- [Topic to Queue Mapping](https://tutorials.solace.dev/jms/topic-to-queue-mapping/): Learn how to map existing topics to Solace queues.
+- [Obtaining JMS objects using JNDI](https://tutorials.solace.dev/jms/using-jndi/): Learn how to use JNDI as a way to create JMS objects.
+- [Obtaining JMS objects using external service JNDI](https://tutorials.solace.dev/jms/using-external-jndi/): Learn how to use external JNDI service as a way to create JMS objects.
 
 ## Prerequisites
 
