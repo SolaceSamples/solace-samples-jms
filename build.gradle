@@ -95,7 +95,12 @@ def scripts = [
     'queueProducerJNDI':'com.solace.samples.QueueProducerJNDI',
     'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
     'extJndiImport':'com.solace.samples.ExtJndiImport',
-    'extJndiTest':'com.solace.samples.ExtJndiTest'
+    'extJndiTest':'com.solace.samples.ExtJndiTest',
+    'distributedTracingManualInstrumentationQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
+    'distributedTracingManualInstrumentationQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
+    'distributedTracingManualInstrumentationTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
+    'distributedTracingManualInstrumentationTopicSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSubscriber',
+    'distributedTracingManualInstrumentationTopicSyncReceiver':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSyncReceiver'
 ]
 
 scripts.each() { scriptName, className ->

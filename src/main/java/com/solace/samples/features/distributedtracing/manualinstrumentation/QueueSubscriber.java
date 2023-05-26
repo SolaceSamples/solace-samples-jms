@@ -82,6 +82,8 @@ public class QueueSubscriber {
     // Enables persistent queues or topic endpoints to be created dynamically
     // on the router, used when Session.createQueue() is called below
     connectionFactory.setDynamicDurables(true);
+    // Remove this setting if the destination queue on the broker is configured to respect message TTLs
+    connectionFactory.setRespectTTL(false);
 
     try (final Connection connection = connectionFactory.createConnection()) {
       // Create a non-transacted, Auto ACK session.
