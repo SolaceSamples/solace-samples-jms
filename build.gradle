@@ -96,11 +96,11 @@ def scripts = [
     'queueConsumerJNDI':'com.solace.samples.QueueConsumerJNDI',
     'extJndiImport':'com.solace.samples.ExtJndiImport',
     'extJndiTest':'com.solace.samples.ExtJndiTest',
-    'distributedTracingManualInstrumentationQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
-    'distributedTracingManualInstrumentationQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
-    'distributedTracingManualInstrumentationTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
-    'distributedTracingManualInstrumentationTopicSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSubscriber',
-    'distributedTracingManualInstrumentationTopicSyncReceiver':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSyncReceiver'
+    'dtQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
+    'dtQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
+    'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
+    'dtTopicSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSubscriber',
+    'dtTopicSyncReceiver':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSyncReceiver'
 ]
 
 scripts.each() { scriptName, className ->
