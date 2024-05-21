@@ -49,6 +49,8 @@ public class TracingUtil {
 
 		// If gRPC:
 		OtlpGrpcSpanExporter spanExporterGrpc = OtlpGrpcSpanExporter.builder()
+	            .setEndpoint("http://localhost:4317")
+	            .build();
 
 		// If HTTP:
 		OtlpHttpSpanExporter spanExporterHttp = OtlpHttpSpanExporter.builder()
