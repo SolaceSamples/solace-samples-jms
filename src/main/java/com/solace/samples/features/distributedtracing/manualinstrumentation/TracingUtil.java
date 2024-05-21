@@ -20,8 +20,10 @@
 package com.solace.samples.features.distributedtracing.manualinstrumentation;
 
 import com.solace.opentelemetry.javaagent.jms.SolaceJmsContextPropagator;
+import com.solace.opentelemetry.javaagent.jms.SolaceJmsBaggagePropagator;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -47,8 +49,6 @@ public class TracingUtil {
 
 		// If gRPC:
 		OtlpGrpcSpanExporter spanExporterGrpc = OtlpGrpcSpanExporter.builder()
-			.setEndpoint("http://localhost:4317")
-			.build();
 
 		// If HTTP:
 		OtlpHttpSpanExporter spanExporterHttp = OtlpHttpSpanExporter.builder()
@@ -66,8 +66,13 @@ public class TracingUtil {
 		// This Instance can be used to get tracer if it is not configured as global
 		OpenTelemetrySdk.builder()
 			.setTracerProvider(sdkTracerProvider)
-			//.setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-			.setPropagators(ContextPropagators.create(new SolaceJmsContextPropagator()))
-			.buildAndRegisterGlobal();
+            .setPropagators(
+                    ContextPropagators.create(
+                        TextMapPropagator.composite(
+                            new SolaceJmsContextPropagator(), // Solace JMS Context Propagator
+                            new SolaceJmsBaggagePropagator()  // Solace JMS Baggage Propagator
+                        )
+                    )
+                ).buildAndRegisterGlobal();
 	}
 }
