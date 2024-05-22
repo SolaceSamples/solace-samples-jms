@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.solace</groupId>
             <artifactId>solace-opentelemetry-jms-integration</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- OpenTelemetry https://mvnrepository.com/artifact/io.opentelemetry -->
