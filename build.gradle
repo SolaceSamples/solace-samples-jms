@@ -97,8 +97,6 @@ def scripts = [
     'dtQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
     'dtQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
-    'dtTopicSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSubscriber',
-    'dtTopicSyncReceiver':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicSyncReceiver'
 ]
 
 scripts.each() { scriptName, className ->
