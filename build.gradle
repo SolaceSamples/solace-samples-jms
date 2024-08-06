@@ -53,15 +53,15 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    implementation('com.solacesystems:sol-jms:10.19.0')
+    implementation group: 'com.solacesystems', name:'sol-jms', version: '10.+'
     implementation group: 'javax.jms', name: 'javax.jms-api', version: '2.0.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.17.1'
 
     //OpenTelemetry dependency
-    implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.29.0'
-    implementation group: 'io.opentelemetry', name: 'opentelemetry-semconv', version: '1.29.0-alpha'
+    implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.+'
+    implementation group: 'io.opentelemetry.semconv', name: 'opentelemetry-semconv', version: '1.+'
 
     //Solace OpenTelemetry Integration for JMS
     implementation group: 'com.solace', name: 'solace-opentelemetry-jms-integration', version: '1.1.0'
