@@ -34,6 +34,10 @@ import java.util.Hashtable;
 
 /**
  * Sample of how to enable Payload Compression in JMS.
+ * <p>
+ * Note: brokers with JMS payload compression in the connection factory WILL OVERWRITE the {@code InitialContext}.
+ * The {@code InitialContext} payload compression value is only used for connecting to older brokers without JMS payload compression support.
+ * To use payload compression on newer brokers, configure its value in the broker's connection factory that you connect to.
  */
 public class HowToEnablePayloadCompression {
     final static String SOLJMS_INITIAL_CONTEXT_FACTORY = "com.solacesystems.jndi.SolJNDIInitialContextFactory";
@@ -51,9 +55,11 @@ public class HowToEnablePayloadCompression {
      *     <p>Value meanings:
      *     <ul>
      *       <li>0 - disable payload compression (the default)
-     *       <li>1 - least amount of compression and fastest data throughput
-     *       <li>9 - most compression and slowest data throughput
+     *       <li>1 - least amount of compression, fastest encoding/decoding speed
+     *       <li>9 - most compression, slowest encoding/decoding speed
      *     </ul>
+     *     Note: While higher compression levels increase encoding/decoding time, they may improve overall throughput in
+     *     network-bound scenarios, especially with large messages or high-latency connections.
      *
      * @return An {@code InitialContext} instance with payload compression enabled
      *
@@ -81,9 +87,11 @@ public class HowToEnablePayloadCompression {
      *     <p>Value meanings:
      *     <ul>
      *       <li>0 - disable payload compression (the default)
-     *       <li>1 - least amount of compression and fastest data throughput
-     *       <li>9 - most compression and slowest data throughput
+     *       <li>1 - least amount of compression, fastest encoding/decoding speed
+     *       <li>9 - most compression, slowest encoding/decoding speed
      *     </ul>
+     *     Note: While higher compression levels increase encoding/decoding time, they may improve overall throughput in
+     *     network-bound scenarios, especially with large messages or high-latency connections.
      *
      * @see SupportedProperty#SOLACE_JMS_PAYLOAD_COMPRESSION_LEVEL
      */
@@ -111,9 +119,11 @@ public class HowToEnablePayloadCompression {
      *     <p>Value meanings:
      *     <ul>
      *       <li>0 - disable payload compression (the default)
-     *       <li>1 - least amount of compression and fastest data throughput
-     *       <li>9 - most compression and slowest data throughput
+     *       <li>1 - least amount of compression, fastest encoding/decoding speed
+     *       <li>9 - most compression, slowest encoding/decoding speed
      *     </ul>
+     *     Note: While higher compression levels increase encoding/decoding time, they may improve overall throughput in
+     *     network-bound scenarios, especially with large messages or high-latency connections.
      *
      * @see SupportedProperty#SOLACE_JMS_PAYLOAD_COMPRESSION_LEVEL
      */
