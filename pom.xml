@@ -8,8 +8,8 @@
     <description>Solace Messaging Examples for JMS 1.1</description>
 
     <properties>
-        <opentelemetry.version>1.19.0</opentelemetry.version>
-        <opentelemetry-alpha.version>1.19.0-alpha</opentelemetry-alpha.version>
+        <opentelemetry.version>1.42.1</opentelemetry.version>
+        <opentelemetry-alpha.version>1.29.0-alpha</opentelemetry-alpha.version>
     </properties>
 
     <dependencies>
@@ -21,14 +21,14 @@
         <dependency>
             <groupId>com.solacesystems</groupId>
             <artifactId>sol-jms</artifactId>
-            <version>10.25.0</version>
+            <version>[10.25.0,)</version>
         </dependency>
 
         <!-- Solace OpenTelemetry Integration for JMS -->
         <dependency>
             <groupId>com.solace</groupId>
             <artifactId>solace-opentelemetry-jms-integration</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- OpenTelemetry https://mvnrepository.com/artifact/io.opentelemetry -->
@@ -48,7 +48,7 @@
             <version>${opentelemetry.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry</groupId>
+            <groupId>io.opentelemetry.semconv</groupId>
             <artifactId>opentelemetry-semconv</artifactId>
             <version>${opentelemetry-alpha.version}</version>
         </dependency>

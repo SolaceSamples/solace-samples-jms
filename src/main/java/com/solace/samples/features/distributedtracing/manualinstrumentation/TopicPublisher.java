@@ -24,6 +24,8 @@ import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.baggage.propagation.BaggageUtil;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -31,9 +33,10 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapPropagator;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes.MessagingDestinationKindValues;
+import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.SemanticAttributes.MessagingDestinationKindValues;
 import javax.jms.Connection;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
@@ -51,11 +54,12 @@ import javax.jms.Topic;
  */
 public class TopicPublisher {
 
-  final String TOPIC_NAME = "solace/samples/jms/direct/pub/tracing";
-  private static final String SERVICE_NAME = "SolaceJMSTopicPublisherManualInstrument";
+  private static final String SERVICE_NAME = "ACME Product Master [DEV]";
+  private static final String TOPIC_NAME = "acme/plm/product/updated/001";
 
   static {
-    //Setup OpenTelemetry
+	// "configure an instance of the OpenTelemetrySdk as early as possible in your application."
+  	// Ref: https://opentelemetry.io/docs/languages/java/instrumentation/
     TracingUtil.initManualTracing(SERVICE_NAME);
   }
 
@@ -87,6 +91,8 @@ public class TopicPublisher {
       final MessageProducer messageProducer = session.createProducer(messageDestination);
 
       final TextMessage message = session.createTextMessage("Hello world!");
+      message.setJMSDeliveryMode(DeliveryMode.PERSISTENT);			// Distributed Tracing only covers persistent messaging
+      
       final OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
       final Tracer tracer = openTelemetry.getTracer(SERVICE_NAME);
 
@@ -106,33 +112,92 @@ public class TopicPublisher {
   }
 
   void traceAndPublish(Message message, MessageProducer messageProducer, Topic messageDestination,
-      OpenTelemetry openTelemetry, Tracer tracer) throws JMSException {
-    final Span sendSpan = tracer
-        .spanBuilder("mySolacePublisherApp > send")
-        .setSpanKind(SpanKind.CLIENT)
-        // Optional: user defined Span attributes
-        .setAttribute(SemanticAttributes.MESSAGING_SYSTEM, "SolacePubSub+")
-        .setAttribute(SemanticAttributes.MESSAGING_OPERATION, "send")
-        .setAttribute(SemanticAttributes.MESSAGING_DESTINATION, messageDestination.getTopicName())
-        .setAttribute(SemanticAttributes.MESSAGING_DESTINATION_KIND,
-            MessagingDestinationKindValues.TOPIC)
-        .setAttribute(SemanticAttributes.MESSAGING_TEMP_DESTINATION, false)
-        .setParent(Context.current()) // set current context as parent
-        .startSpan();
+		  OpenTelemetry openTelemetry, Tracer tracer) throws JMSException {
 
-    try (final Scope scope = sendSpan.makeCurrent()) {
-      final SolaceJmsW3CTextMapSetter setter = new SolaceJmsW3CTextMapSetter();
-      final TextMapPropagator propagator = openTelemetry.getPropagators().getTextMapPropagator();
-      //and then inject current context with send span into the message
-      propagator.inject(Context.current(), message, setter);
-      // message is being published to the given topic
-      messageProducer.send(messageDestination, message);
-    } catch (Exception e) {
-      e.printStackTrace();
-      sendSpan.setStatus(StatusCode.ERROR, e.getMessage());
-    } finally {
-      sendSpan.end();
-    }
+	  // Use the setter and propagator to inject OpenTelemetry info in the outgoing message
+	  final SolaceJmsW3CTextMapSetter setter = new SolaceJmsW3CTextMapSetter();
+	  final TextMapPropagator propagator = openTelemetry.getPropagators().getTextMapPropagator();
+
+      // Spans are sections of code to instrument and identify. In this case creating a single 'send' span to cover the message publish.
+      // (The span attributes are the details that get sent in each emitted span, should be consistent across applications.)
+
+	  final Span sendSpan = tracer
+			  .spanBuilder("Product Update > Send")    // The name as seen in the OTEL visualisation.
+	          .setSpanKind(SpanKind.PRODUCER)          // A broad identifier of the type of operation
+			  
+	          // Optional: user defined Span attributes
+	          // dot separated, snake_case is the convention, keeping to a fixed 'something.*' name space too for custom ones.
+	          // See: https://opentelemetry.io/docs/specs/semconv/general/attribute-naming/
+
+	          // Some runtime attributes to include:
+	          .setAttribute("env", "Development")
+	          .setAttribute("user.name", System.getProperty("user.name"))
+	          .setAttribute("java.version", System.getProperty("java.version"))
+	          .setAttribute("os.name", System.getProperty("os.name"))
+
+	          // Some transport attributes to include, in the SemanticAttributes name space:
+	          // See: https://opentelemetry.io/docs/specs/semconv/general/trace/
+			  
+	          // Some transport attributes to include, in the SemanticAttributes name space:
+	          // See: https://opentelemetry.io/docs/specs/semconv/general/trace/
+
+	          .setAttribute(SemanticAttributes.MESSAGING_SYSTEM, "solace")
+	          .setAttribute(SemanticAttributes.MESSAGING_OPERATION, "send")
+	          .setAttribute(SemanticAttributes.MESSAGING_DESTINATION_NAME, messageDestination.getTopicName())
+	          .setAttribute(SemanticAttributes.NET_PROTOCOL_NAME, "smf")
+	            
+			  .setParent(Context.current()) // set current context as parent (empty in this case, same as .setNoParent() )
+			  .startSpan();
+
+	  // This is signalling the span to have started, timestamps automatically captured.
+	  try (Scope scope = sendSpan.makeCurrent()) {
+
+		  // Add some OTEL Baggage (key-value store) of contextual information 
+		  // that can 'propagate' across multiple systems and spans by being copied from one to another.
+		  // See: https://opentelemetry.io/docs/concepts/signals/baggage/
+
+		  // This is actually carried as span attributes in a specific attribute naming range, 
+		  // however it is transparent to the recipient when the baggage is extracted.
+		  // i.e. No need to worry about a name space, just key names as needed by the downstream application(s).
+		  // Using the W3C Propagater, see below for key name rules and restrictions.
+		  // https://www.w3.org/TR/baggage/#key
+
+		  // Baggage in this case is the business data of product code and the operation that took place for it.
+		  // An operator can search the Observability tool by the product code, not needing to know about transport details.
+		  String productCode = "A001";
+		  String operation = "updated";
+		  String telemetryBaggageStr = "product_operation=" + operation + ",product_code=" + productCode;
+		  Baggage telemetryBaggage = BaggageUtil.extractBaggage(telemetryBaggageStr);
+
+          // Store the baggage in the current OTEL context
+          telemetryBaggage.storeInContext(Context.current()).makeCurrent();
+          
+          // Inject the Context (containing the send span and baggage) into the message
+          propagator.inject(Context.current(), message, setter);
+
+          // [Optional: for wider ecosystem compatibility...]
+          // Insert the trace info as a message property to convey it to systems and protocols that do not support otel natively
+          // i.e. Could be useful for internal logging for a receiver, or when creating onward spans manually and need the parent Trace ID.
+          
+          message.setStringProperty("otel_parent_trace_id", Span.current().getSpanContext().getTraceId());
+          message.setStringProperty("otel_parent_span_id", Span.current().getSpanContext().getSpanId());
+          message.setStringProperty("otel_parent_baggage", telemetryBaggageStr ); 
+
+          
+		  // message is being published to the given topic
+		  messageProducer.send(messageDestination, message);
+		  
+          System.out.println("Message sent, search for Trace ID: " + Span.current().getSpanContext().getTraceId());
+
+	  } catch (Exception e) {
+		  // Any exceptions in the send can also be captured in the span:
+          sendSpan.recordException(e);
+		  sendSpan.setStatus(StatusCode.ERROR, e.getMessage());
+		  e.printStackTrace();
+	  } finally {
+		  // Mark the end of the span (instrumented section of code) by calling .end(). Data is then emitted.
+		  sendSpan.end();
+	  }
   }
 
   public static void main(String... args) throws Exception {
