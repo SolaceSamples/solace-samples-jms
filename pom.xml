@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.solacesystems</groupId>
             <artifactId>sol-jms</artifactId>
-            <version>[10.24.1,)</version>
+            <version>[10.25.0,)</version>
         </dependency>
 
         <!-- Solace OpenTelemetry Integration for JMS -->
