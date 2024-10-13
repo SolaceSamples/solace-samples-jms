@@ -117,7 +117,7 @@ public class QueueSubscriber {
       // Use the anonymous inner class for receiving messages asynchronously
       messageConsumer.setMessageListener(message -> {
         traceAndProcess(message, consoleLogger, messageDestination, openTelemetry, tracer);
-        latch.countDown();
+        latch.countDown();  // this sample is for only one message... typically, delete latch & receive lots of messages
       });
 
       // Start receiving messages
@@ -126,6 +126,7 @@ public class QueueSubscriber {
 
       // the main thread blocks at the next statement until a message received
       latch.await();
+      Thread.sleep(1500);  // give time for ACK and OTel to be flushed before disconnecting.
       connection.stop();
       messageConsumer.close();
       session.close();
