@@ -68,8 +68,9 @@ public class HowToCreateAConnectionForOpenIdConnect {
                                 // Implement your token refresh logic here
                                 try {
                                     env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ACCESS_TOKEN, refreshOAuthAccessToken(issuerIdentifierURL));
-                                    env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ACCESS_TOKEN, refreshOIDCAccessToken(issuerIdentifierURL));
+                                    env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ISSUER_IDENTIFIER, refreshOIDCAccessToken(issuerIdentifierURL));
                                 } catch (Exception e) {
+                                    //Make sure to catch a specific Exception inline with the OAuth and OpenID provider you are referring to
                                     e.printStackTrace();
                                 }
 

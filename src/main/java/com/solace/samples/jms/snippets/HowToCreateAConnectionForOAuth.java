@@ -68,6 +68,7 @@ public class HowToCreateAConnectionForOAuth {
                                 try {
                                     env.put(SupportedProperty.SOLACE_JMS_OAUTH2_ACCESS_TOKEN, refreshAccessToken(issuerIdentifierURL));
                                 } catch (Exception e) {
+                                    //Make sure to catch a specific Exception inline with the OAuth and OpenID provider you are referring to
                                     e.printStackTrace();
                                 }
 
