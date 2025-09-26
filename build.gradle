@@ -60,14 +60,18 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
 
     //OpenTelemetry dependency
-    implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.+'
-    implementation group: 'io.opentelemetry.semconv', name: 'opentelemetry-semconv', version: '1.+'
+    implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.47.+'
+    implementation group: 'io.opentelemetry.semconv', name: 'opentelemetry-semconv', version: '1.29.+'
 
     //Solace OpenTelemetry Integration for JMS
     implementation group: 'com.solace', name: 'solace-opentelemetry-jms-integration', version: '1.1.0'
 
     // For any local libs that are not available from mavenCentral
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+tasks.named('installDist') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 sourceSets {
