@@ -8,7 +8,7 @@
     <description>Solace Messaging Examples for JMS 1.1</description>
 
     <properties>
-        <opentelemetry.version>1.42.1</opentelemetry.version>
+        <opentelemetry.version>1.62.0</opentelemetry.version>
         <opentelemetry-alpha.version>1.29.0-alpha</opentelemetry-alpha.version>
     </properties>
 
