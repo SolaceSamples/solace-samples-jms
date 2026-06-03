@@ -53,11 +53,14 @@ repositories {
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    implementation group: 'com.solacesystems', name:'sol-jms', version: '[10.25.0,)'
+    implementation group: 'com.solacesystems', name:'sol-jms', version: '[10.30.1,)'
     implementation group: 'javax.jms', name: 'javax.jms-api', version: '2.0.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.+'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.+'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
+
+    // Only required when using SERDES
+    implementation("com.solace:solace-schema-registry-jsonschema-serde:1.0.0")
 
     //OpenTelemetry dependency
     implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.47.+'
@@ -101,6 +104,7 @@ def scripts = [
     'dtQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
     'dtQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
+    'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
 ]
 
 scripts.each() { scriptName, className ->
