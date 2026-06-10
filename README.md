@@ -85,6 +85,7 @@ To generate IDEA metadata (.iml and .ipr files), do the following:
 ## Schema Registry Samples
 This repository also includes samples demonstrating serialization and deserialization (SERDES) with Solace Schema Registry support:
 
+- Avro SERDES: Learn how to serialize and deserialize messages using Avro schemas
 - JSON Schema SERDES: Learn how to serialize and deserialize messages using JSON Schema validation
 
 For detailed information about SERDES samples, Schema Registry setup, and schema upload instructions, see the [SERDES README](src/main/java/com/solace/samples/features/serdes/README.md).

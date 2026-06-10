@@ -12,6 +12,11 @@ To upload a schema in the Solace Schema Registry, follow these steps:
 
 2. Leave the Group Id field empty.
 
+   ### Avro Schema
+    - **Artifact Id**: Use a unique identifier for each schema:
+        - For `user.avsc`, use `solace/samples/avro`
+        - **Type**: Select `Avro Schema`.
+
    ### JSON Schema
     - **Artifact Id**: Use a unique identifier for each schema:
         - For `user.json`, use `solace/samples/json`
@@ -27,9 +32,11 @@ After setting the Artifact ID and Type, follow these steps:
 
 5. On the Version Content Page, leave the version set to auto, or if preferred, enter a specific value of your choice.
 
-### For JSON Schema:
-6. On the Version Content Page, upload the appropriate schema file from the `src/main/resources/json-schema/` directory:
-    - When using Artifact Id `solace/samples/json`, upload `user.json`
+6. On the Version Content Page, upload the appropriate schema file:
+    - **Avro Schema**: from the `src/main/resources/avro-schema/` directory:
+        - When using Artifact Id `solace/samples/avro`, upload `user.avsc`
+    - **JSON Schema**: from the `src/main/resources/json-schema/` directory:
+        - When using Artifact Id `solace/samples/json`, upload `user.json`
 
 7. Click "Next" to move forward.
 

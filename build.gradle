@@ -34,8 +34,8 @@ eclipse {
     }
     jdt {
         //if you want to alter the java versions (by default they are configured with gradle java plugin settings):
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 11
+        targetCompatibility = 11
     }
 }
 
@@ -60,7 +60,9 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
 
     // Only required when using SERDES
-    implementation("com.solace:solace-schema-registry-jsonschema-serde:1.0.0")
+    implementation platform(group: 'com.solace', name: 'solace-schema-registry-serdes-bom', version: '1.+')
+    implementation group: 'com.solace', name: 'solace-schema-registry-avro-serde'
+    implementation group: 'com.solace', name: 'solace-schema-registry-jsonschema-serde'
 
     //OpenTelemetry dependency
     implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.47.+'
@@ -105,6 +107,7 @@ def scripts = [
     'dtQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
     'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
+    'HelloWorldJmsAvroSerde':'com.solace.samples.features.serdes.avro.HelloWorldJmsAvroSerde',
 ]
 
 scripts.each() { scriptName, className ->
