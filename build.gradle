@@ -108,6 +108,7 @@ def scripts = [
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
     'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
     'HelloWorldJmsAvroSerde':'com.solace.samples.features.serdes.avro.HelloWorldJmsAvroSerde',
+    'AvroDeserializeConsumer':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumer',
 ]
 
 scripts.each() { scriptName, className ->
