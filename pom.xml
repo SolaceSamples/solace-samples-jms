@@ -101,6 +101,23 @@
                     </descriptorRefs>
                 </configuration>
             </plugin>
+            <!-- Generates POJOs from the JSON schemas -->
+            <plugin>
+                <groupId>org.jsonschema2pojo</groupId>
+                <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+                <version>1.3.3</version>
+                <configuration>
+                    <sourceDirectory>${basedir}/src/main/resources/json-schema</sourceDirectory>
+                    <targetPackage>com.solace.samples.serdes.jsonschema</targetPackage>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

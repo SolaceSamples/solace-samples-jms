@@ -1,7 +1,10 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'application'
+    id 'idea'
+    id 'eclipse'
+    id 'org.jsonschema2pojo' version '1.2.1' // Newer version of jsonschema2pojo will require a newer version of gradle to work
+}
 
 // Don't need these task, so disabling them. Makes it possible to avoid
 // declaring a single application main class.
@@ -79,10 +82,24 @@ tasks.named('installDist') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+def jsonDestDir = layout.buildDirectory.dir("generated-sources/jsonschema").get().asFile
+
+// Configure the jsonschema2pojo extension to generate POJOs from the JSON schemas
+jsonSchema2Pojo {
+    source = files("${projectDir}/src/main/resources/json-schema")
+    targetDirectory = jsonDestDir
+    targetPackage = 'com.solace.samples.serdes.jsonschema'
+}
+
+compileJava {
+    dependsOn generateJsonSchema2Pojo
+}
+
 sourceSets {
     main {
         java {
             srcDir 'src/main/java'
+            srcDir jsonDestDir        // generated JSON Schema classes
             exclude '**/DirectProcessor.java'
        }
    }
@@ -109,6 +126,8 @@ def scripts = [
     'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
     'HelloWorldJmsAvroSerde':'com.solace.samples.features.serdes.avro.HelloWorldJmsAvroSerde',
     'AvroDeserializeConsumer':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumer',
+    'JsonSchemaDeserializeConsumerToJsonNode':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToJsonNode',
+    'JsonSchemaDeserializeConsumerToPojo':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToPojo',
 ]
 
 scripts.each() { scriptName, className ->
