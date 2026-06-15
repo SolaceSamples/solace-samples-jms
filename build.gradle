@@ -53,6 +53,9 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    avroTools
+}
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
@@ -76,13 +79,48 @@ dependencies {
 
     // For any local libs that are not available from mavenCentral
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Avro tools for schema code generation
+    avroTools group: 'org.apache.avro', name: 'avro-tools', version: '1.12.0'
 }
 
 tasks.named('installDist') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+def avroDestDir = layout.buildDirectory.dir("generated-sources/avro").get().asFile
 def jsonDestDir = layout.buildDirectory.dir("generated-sources/jsonschema").get().asFile
+
+task generateAvro(type: JavaExec) {
+    description = 'Generates Java classes from Avro schema files'
+    group = 'build'
+
+    classpath = configurations.avroTools
+    mainClass = 'org.apache.avro.tool.Main'
+
+    def avroSrcDir = "${projectDir}/src/main/resources/avro-schema"
+    def userSchemaFile = file("${avroSrcDir}/user.avsc")
+
+    // Create output directory if it doesn't exist
+    doFirst {
+        file(avroDestDir).mkdirs()
+
+        // Make sure the file exists before trying to compile it
+        if (!userSchemaFile.exists()) {
+            throw new GradleException("Schema file ${userSchemaFile} does not exist!")
+        }
+    }
+
+    args = [
+            'compile',
+            'schema',
+            userSchemaFile.absolutePath,
+            avroDestDir
+    ]
+
+    inputs.file(userSchemaFile)
+    outputs.dir(avroDestDir)
+}
 
 // Configure the jsonschema2pojo extension to generate POJOs from the JSON schemas
 jsonSchema2Pojo {
@@ -92,6 +130,7 @@ jsonSchema2Pojo {
 }
 
 compileJava {
+    dependsOn generateAvro
     dependsOn generateJsonSchema2Pojo
 }
 
@@ -99,6 +138,7 @@ sourceSets {
     main {
         java {
             srcDir 'src/main/java'
+            srcDir avroDestDir        // generated Avro classes
             srcDir jsonDestDir        // generated JSON Schema classes
             exclude '**/DirectProcessor.java'
        }
@@ -125,7 +165,10 @@ def scripts = [
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
     'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
     'HelloWorldJmsAvroSerde':'com.solace.samples.features.serdes.avro.HelloWorldJmsAvroSerde',
+    'AvroSerializeProducer':'com.solace.samples.features.serdes.avro.AvroSerializeProducer',
+    'AvroSerializeProducerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroSerializeProducerSpecificRecord',
     'AvroDeserializeConsumer':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumer',
+    'AvroDeserializeConsumerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumerSpecificRecord',
     'JsonSchemaDeserializeConsumerToJsonNode':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToJsonNode',
     'JsonSchemaDeserializeConsumerToPojo':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToPojo',
 ]

@@ -19,40 +19,36 @@
 
 package com.solace.samples.features.serdes.avro;
 
-import com.solace.serdes.Deserializer;
-import com.solace.serdes.avro.AvroDeserializer;
+import com.solace.samples.serdes.avro.schema.User;
+import com.solace.serdes.Serializer;
+import com.solace.serdes.avro.AvroSerializer;
 import com.solace.serdes.common.resolver.config.SchemaResolverProperties;
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
-import org.apache.avro.generic.GenericRecord;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import javax.jms.DeliveryMode;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This sample demonstrates how to use Solace JMS API with Avro deserialization to consume a message.
- * It connects to a Solace message broker, subscribes to a topic, and deserializes the received message using Avro
- * into a generic record (an Avro {@link GenericRecord}). This is the default record type and requires no
- * generated schema class.
+ * This sample demonstrates how to use the Solace JMS API with Avro serialization to produce messages
+ * from a generated Avro specific record (the {@link User} class). It connects to a Solace message broker,
+ * serializes a strongly-typed {@code User} using Avro, and publishes a single message to a topic.
  *
- * <p>For the specific-record variant that deserializes into a generated Avro class, see
- * {@link AvroDeserializeConsumerSpecificRecord}.
+ * <p>For the generic-record variant that serializes an Avro {@code GenericRecord}, see
+ * {@link AvroSerializeProducer}.
  *
- * <p>This consumer is designed to be used with the AvroSerializeProducer sample.
+ * <p>This producer is designed to be used with the AvroDeserializeConsumerSpecificRecord sample.
  *
  * <p>Before running this sample, you must upload the user.avsc schema to the Solace Schema Registry
  * with artifact ID "solace/samples/avro".
  *
- * <p>Usage: AvroDeserializeConsumer &lt;host:port&gt; &lt;message-vpn&gt; &lt;client-username&gt; [password]
+ * <p>Usage: AvroSerializeProducerSpecificRecord &lt;host:port&gt; &lt;message-vpn&gt; &lt;client-username&gt; [password]
  *
  * <p>Environment variables for Schema Registry configuration:
  * <ul>
@@ -61,9 +57,9 @@ import java.util.Map;
  *   <li>REGISTRY_PASSWORD - Schema Registry password (default: roPassword)</li>
  * </ul>
  */
-public class AvroDeserializeConsumer {
+public class AvroSerializeProducerSpecificRecord {
 
-    private static final String SAMPLE_NAME = AvroDeserializeConsumer.class.getSimpleName();
+    private static final String SAMPLE_NAME = AvroSerializeProducerSpecificRecord.class.getSimpleName();
     private static final String TOPIC_NAME = "solace/samples/avro";
     private static final String API = "JMS";
 
@@ -90,67 +86,48 @@ public class AvroDeserializeConsumer {
         connectionFactory.setDirectTransport(false);
         connectionFactory.setClientID(API + "_" + SAMPLE_NAME);
 
-        // Create and configure Avro deserializer
-        try (Deserializer<GenericRecord> deserializer = new AvroDeserializer<>();
+        // Create and configure Avro serializer
+        try (Serializer<User> serializer = new AvroSerializer<>();
              Connection connection = connectionFactory.createConnection()) {
 
-            deserializer.configure(getConfig());
+            serializer.configure(getConfig());
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
             Topic topic = session.createTopic(TOPIC_NAME);
 
-            // Create the message consumer for the subscription topic
-            MessageConsumer messageConsumer = session.createConsumer(topic);
+            // Create the message producer
+            MessageProducer producer = session.createProducer(topic);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
-            // Start receiving messages
-            connection.start();
+            // Create a User specific record
+            User user = new User();
+            user.setId("123");
+            user.setName("John Doe");
+            user.setEmail("support@solace.com");
 
-            System.out.println("Awaiting message...");
-            // The current thread blocks at the next statement until a message arrives
-            Message message = messageConsumer.receive();
-
-            if (message == null) {
-                System.out.println("Consumer closed before a message was received.");
-                return;
-            }
-
-            // Process received message
-            byte[] payloadBytes;
+            // Serialize the user record using the Avro serializer
             Map<String, Object> headers = new HashMap<>();
+            byte[] payloadBytes = serializer.serialize(TOPIC_NAME, user, headers);
 
-            if (message instanceof BytesMessage) {
-                BytesMessage bytesMessage = (BytesMessage) message;
+            // Create a BytesMessage with the serialized payload
+            BytesMessage bytesMessage = session.createBytesMessage();
+            bytesMessage.writeBytes(payloadBytes);
 
-                // Read the payload bytes
-                payloadBytes = new byte[(int) bytesMessage.getBodyLength()];
-                bytesMessage.readBytes(payloadBytes);
-            } else if (message instanceof TextMessage) {
-                TextMessage textMessage = (TextMessage) message;
-
-                // Convert text to bytes
-                payloadBytes = textMessage.getText().getBytes(StandardCharsets.UTF_8);
-            } else {
-                System.out.println("Unexpected message type received: " + message.getClass().getName());
-                return;
+            // Set schema registry headers as message properties
+            for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                bytesMessage.setObjectProperty(entry.getKey(), entry.getValue());
             }
 
-            // Extract headers from message properties
-            Enumeration<?> propertyNames = message.getPropertyNames();
-            while (propertyNames.hasMoreElements()) {
-                String propertyName = (String) propertyNames.nextElement();
-                headers.put(propertyName, message.getObjectProperty(propertyName));
-            }
+            producer.send(bytesMessage);
+            System.out.printf(">> Sending User: %s%n", user);
+        } // Auto-closes the serializer and connection
 
-            // Deserialize the received message
-            GenericRecord user = deserializer.deserialize(TOPIC_NAME, payloadBytes, headers);
-
-            System.out.println("Received message with record: " + user);
-        } // Auto-closes the deserializer and connection
+        System.out.println("Message sent. Exiting.");
     }
 
     /**
-     * Returns a configuration map for the Avro deserializer.
+     * Returns a configuration map for the Avro serializer.
      *
      * @return A Map containing configuration properties for the Schema Registry
      */
@@ -179,6 +156,6 @@ public class AvroDeserializeConsumer {
             System.out.printf("Usage: %s <host:port> <message-vpn> <client-username> [password]%n%n", SAMPLE_NAME);
             System.exit(-1);
         }
-        new AvroDeserializeConsumer().run(args);
+        new AvroSerializeProducerSpecificRecord().run(args);
     }
 }

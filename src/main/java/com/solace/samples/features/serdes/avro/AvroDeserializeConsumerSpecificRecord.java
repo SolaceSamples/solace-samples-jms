@@ -19,12 +19,13 @@
 
 package com.solace.samples.features.serdes.avro;
 
+import com.solace.samples.serdes.avro.schema.User;
 import com.solace.serdes.Deserializer;
 import com.solace.serdes.avro.AvroDeserializer;
+import com.solace.serdes.avro.AvroProperties;
 import com.solace.serdes.common.resolver.config.SchemaResolverProperties;
 import com.solacesystems.jms.SolConnectionFactory;
 import com.solacesystems.jms.SolJmsUtility;
-import org.apache.avro.generic.GenericRecord;
 
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
@@ -39,20 +40,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This sample demonstrates how to use Solace JMS API with Avro deserialization to consume a message.
- * It connects to a Solace message broker, subscribes to a topic, and deserializes the received message using Avro
- * into a generic record (an Avro {@link GenericRecord}). This is the default record type and requires no
- * generated schema class.
+ * This sample demonstrates how to use the Solace JMS API with Avro deserialization to consume a message
+ * and deserialize its payload into a generated Avro specific record (the {@link User} class).
+ * The deserializer is configured with {@link AvroProperties#RECORD_TYPE} set to
+ * {@link AvroProperties.AvroRecordType#SPECIFIC_RECORD}, so it returns a strongly-typed {@code User}
+ * instead of a generic record. Refer to the configuration being done in {@link #getConfig()}.
  *
- * <p>For the specific-record variant that deserializes into a generated Avro class, see
- * {@link AvroDeserializeConsumerSpecificRecord}.
+ * <p>For the generic-record variant that deserializes into an Avro {@code GenericRecord}, see
+ * {@link AvroDeserializeConsumer}.
  *
  * <p>This consumer is designed to be used with the AvroSerializeProducer sample.
  *
  * <p>Before running this sample, you must upload the user.avsc schema to the Solace Schema Registry
  * with artifact ID "solace/samples/avro".
  *
- * <p>Usage: AvroDeserializeConsumer &lt;host:port&gt; &lt;message-vpn&gt; &lt;client-username&gt; [password]
+ * <p>Usage: AvroDeserializeConsumerSpecificRecord &lt;host:port&gt; &lt;message-vpn&gt; &lt;client-username&gt; [password]
  *
  * <p>Environment variables for Schema Registry configuration:
  * <ul>
@@ -61,9 +63,9 @@ import java.util.Map;
  *   <li>REGISTRY_PASSWORD - Schema Registry password (default: roPassword)</li>
  * </ul>
  */
-public class AvroDeserializeConsumer {
+public class AvroDeserializeConsumerSpecificRecord {
 
-    private static final String SAMPLE_NAME = AvroDeserializeConsumer.class.getSimpleName();
+    private static final String SAMPLE_NAME = AvroDeserializeConsumerSpecificRecord.class.getSimpleName();
     private static final String TOPIC_NAME = "solace/samples/avro";
     private static final String API = "JMS";
 
@@ -90,8 +92,8 @@ public class AvroDeserializeConsumer {
         connectionFactory.setDirectTransport(false);
         connectionFactory.setClientID(API + "_" + SAMPLE_NAME);
 
-        // Create and configure Avro deserializer
-        try (Deserializer<GenericRecord> deserializer = new AvroDeserializer<>();
+        // Create and configure Avro deserializer for specific records
+        try (Deserializer<User> deserializer = new AvroDeserializer<>();
              Connection connection = connectionFactory.createConnection()) {
 
             deserializer.configure(getConfig());
@@ -142,8 +144,8 @@ public class AvroDeserializeConsumer {
                 headers.put(propertyName, message.getObjectProperty(propertyName));
             }
 
-            // Deserialize the received message
-            GenericRecord user = deserializer.deserialize(TOPIC_NAME, payloadBytes, headers);
+            // Deserialize the received message into a specific User record
+            User user = deserializer.deserialize(TOPIC_NAME, payloadBytes, headers);
 
             System.out.println("Received message with record: " + user);
         } // Auto-closes the deserializer and connection
@@ -151,6 +153,9 @@ public class AvroDeserializeConsumer {
 
     /**
      * Returns a configuration map for the Avro deserializer.
+     * The {@link AvroProperties#RECORD_TYPE} property is set to
+     * {@link AvroProperties.AvroRecordType#SPECIFIC_RECORD} so the deserializer returns a generated
+     * {@link User} object instead of a generic record.
      *
      * @return A Map containing configuration properties for the Schema Registry
      */
@@ -159,6 +164,7 @@ public class AvroDeserializeConsumer {
         config.put(SchemaResolverProperties.REGISTRY_URL, REGISTRY_URL);
         config.put(SchemaResolverProperties.AUTH_USERNAME, REGISTRY_USERNAME);
         config.put(SchemaResolverProperties.AUTH_PASSWORD, REGISTRY_PASSWORD);
+        config.put(AvroProperties.RECORD_TYPE, AvroProperties.AvroRecordType.SPECIFIC_RECORD);
         return config;
     }
 
@@ -179,6 +185,6 @@ public class AvroDeserializeConsumer {
             System.out.printf("Usage: %s <host:port> <message-vpn> <client-username> [password]%n%n", SAMPLE_NAME);
             System.exit(-1);
         }
-        new AvroDeserializeConsumer().run(args);
+        new AvroDeserializeConsumerSpecificRecord().run(args);
     }
 }
