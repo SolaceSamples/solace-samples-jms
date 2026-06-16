@@ -53,3 +53,6 @@ export REGISTRY_URL="http://localhost:8081/apis/registry/v3"
 export REGISTRY_USERNAME="sr-readonly"
 export REGISTRY_PASSWORD="roPassword"
 ```
+
+For additional SERDES snippets see the [samples here](https://github.com/SolaceSamples/solace-samples-java-jcsmp/tree/master/src/main/java/com/solace/samples/jcsmp/snippets/serdes).
+

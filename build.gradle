@@ -169,6 +169,7 @@ def scripts = [
     'AvroSerializeProducerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroSerializeProducerSpecificRecord',
     'AvroDeserializeConsumer':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumer',
     'AvroDeserializeConsumerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumerSpecificRecord',
+    'JsonSchemaSerializeProducer':'com.solace.samples.features.serdes.jsonschema.JsonSchemaSerializeProducer',
     'JsonSchemaDeserializeConsumerToJsonNode':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToJsonNode',
     'JsonSchemaDeserializeConsumerToPojo':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToPojo',
 ]
