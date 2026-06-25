@@ -22,6 +22,8 @@ To upload a schema in the Solace Schema Registry, follow these steps:
    ### JSON Schema
     - **Artifact Id**: Use a unique identifier for each schema:
         - For `user.json`, use `solace/samples/json`
+        - For `create-user.json`, use `solace/samples/create-user/json`
+        - For `create-user-response.json`, use `solace/samples/create-user-response/json`
         - **Type**: Select `JSON Schema`.
 
 >   **Note:** Each schema must be uploaded separately with its own unique Artifact Id to avoid conflicts.
@@ -41,6 +43,8 @@ After setting the Artifact ID and Type, follow these steps:
         - When using Artifact Id `solace/samples/create-user-response/avro`, upload `create-user-response.avsc`
     - **JSON Schema**: from the `src/main/resources/json-schema/` directory:
         - When using Artifact Id `solace/samples/json`, upload `user.json`
+        - When using Artifact Id `solace/samples/create-user/json`, upload `create-user.json`
+        - When using Artifact Id `solace/samples/create-user-response/json`, upload `create-user-response.json`
 
 7. Click "Next" to move forward.
 
