@@ -64,3 +64,37 @@ export REGISTRY_PASSWORD="roPassword"
 
 For additional SERDES snippets see the [samples here](https://github.com/SolaceSamples/solace-samples-java-jcsmp/tree/master/src/main/java/com/solace/samples/jcsmp/snippets/serdes).
 
+---
+
+## Available Samples
+
+Build the project first with `./gradlew assemble`, then run any sample using the generated scripts under `build/staged/bin/`. The default broker and schema registry connection values assume a local setup:
+
+- Broker: `localhost:55555`, VPN: `default`, username: `default`
+- Schema Registry: `http://localhost:8081/apis/registry/v3` (user: `sr-readonly`, password: `roPassword`)
+
+Override the registry connection with environment variables before running if needed (see the [environment variable defaults](#solace-schema-registry) above).
+
+### Avro Samples
+
+| Sample | Description | Command |
+|--------|-------------|---------|
+| `HelloWorldJmsAvroSerde` | Publishes and subscribes to a single message using Avro serialization and deserialization in one sample. | `./build/staged/bin/HelloWorldJmsAvroSerde localhost:55555 default default` |
+| `AvroSerializeProducer` | Serializes a `User` Avro generic record and publishes it to a topic. Pair with `AvroDeserializeConsumer`. | `./build/staged/bin/AvroSerializeProducer localhost:55555 default default` |
+| `AvroSerializeProducerSpecificRecord` | Serializes a strongly-typed generated `User` class and publishes it to a topic. Pair with `AvroDeserializeConsumer` or `AvroDeserializeConsumerSpecificRecord`. | `./build/staged/bin/AvroSerializeProducerSpecificRecord localhost:55555 default default` |
+| `AvroDeserializeConsumer` | Subscribes to a topic and deserializes received messages into an Avro `GenericRecord`. | `./build/staged/bin/AvroDeserializeConsumer localhost:55555 default default` |
+| `AvroDeserializeConsumerSpecificRecord` | Subscribes to a topic and deserializes received messages into a strongly-typed generated `User` class. | `./build/staged/bin/AvroDeserializeConsumerSpecificRecord localhost:55555 default default` |
+| `AvroSerdesReplier` | Request-Reply replier: receives a `CreateUser` request, deserializes it, builds a `CreateUserResponse`, and sends it back. Start before `AvroSerdesRequestor`. | `./build/staged/bin/AvroSerdesReplier localhost:55555 default default` |
+| `AvroSerdesRequestor` | Request-Reply requestor: serializes a `CreateUser` request, publishes it, and deserializes the `CreateUserResponse` reply. | `./build/staged/bin/AvroSerdesRequestor localhost:55555 default default` |
+
+### JSON Schema Samples
+
+| Sample | Description | Command |
+|--------|-------------|---------|
+| `HelloWorldJmsJsonSchemaSerde` | Publishes and subscribes to a single message using JSON Schema serialization and deserialization in one sample. | `./build/staged/bin/HelloWorldJmsJsonSchemaSerde localhost:55555 default default` |
+| `JsonSchemaSerializeProducer` | Serializes a `User` POJO and publishes it to a topic. Pair with a JSON Schema consumer. | `./build/staged/bin/JsonSchemaSerializeProducer localhost:55555 default default` |
+| `JsonSchemaDeserializeConsumerToJsonNode` | Subscribes to a topic and deserializes received messages into a `JsonNode` for generic JSON handling. | `./build/staged/bin/JsonSchemaDeserializeConsumerToJsonNode localhost:55555 default default` |
+| `JsonSchemaDeserializeConsumerToPojo` | Subscribes to a topic and deserializes received messages into a strongly-typed `User` POJO using the `customJavaType` property in the schema. | `./build/staged/bin/JsonSchemaDeserializeConsumerToPojo localhost:55555 default default` |
+| `JsonSchemaSerdesReplier` | Request-Reply replier: receives a `CreateUser` request, deserializes it to a POJO, builds a `CreateUserResponse`, and sends it back. Start before `JsonSchemaSerdesRequestor`. | `./build/staged/bin/JsonSchemaSerdesReplier localhost:55555 default default` |
+| `JsonSchemaSerdesRequestor` | Request-Reply requestor: serializes a `CreateUser` POJO, publishes it, and deserializes the `CreateUserResponse` reply. | `./build/staged/bin/JsonSchemaSerdesRequestor localhost:55555 default default` |
+
