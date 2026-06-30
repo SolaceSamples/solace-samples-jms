@@ -186,14 +186,14 @@ public class HelloWorldJmsJsonSchemaSerde {
 
                 System.out.printf(">> Sending User: %s%n", user);
                 producer.send(bytesMessage);
+
+                // Wait for the consumer to receive the message
+                latch.await();
             } catch (JsonSchemaValidationException ve) {
                 // Handle cases where the message fails validation against the schema.
                 // This could happen if the schema in the registry is different from what is expected.
                 System.out.println("Validation error: " + ve.getMessage());
             }
-
-            // Wait for the consumer to receive the message
-            latch.await();
         } // Try block Auto-closes the serializer, deserializer, and connection
 
         System.out.println("Main thread quitting.");
