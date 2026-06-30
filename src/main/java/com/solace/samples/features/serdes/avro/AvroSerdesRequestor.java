@@ -167,7 +167,7 @@ public class AvroSerdesRequestor {
             if (reply.getJMSCorrelationID() == null) {
                 throw new Exception("Received a reply message with no correlationID.");
             }
-            if (!reply.getJMSCorrelationID().replaceAll("ID:", "").equals(correlationId)) {
+            if (!reply.getJMSCorrelationID().replaceFirst("ID:", "").equals(correlationId)) {
                 throw new Exception("Received invalid correlationID in reply message.");
             }
             // For direct messaging, this flag indicates interoperability with the Solace Java, C, and C# APIs
