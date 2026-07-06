@@ -80,7 +80,7 @@ Override the registry connection with environment variables before running if ne
 | Sample | Description | Command |
 |--------|-------------|---------|
 | `HelloWorldJmsAvroSerde` | Publishes and subscribes to a single message using Avro serialization and deserialization in one sample. | `./build/staged/bin/HelloWorldJmsAvroSerde localhost:55555 default default` |
-| `AvroSerializeProducer` | Serializes a `User` Avro generic record and publishes it to a topic. Pair with `AvroDeserializeConsumer`. | `./build/staged/bin/AvroSerializeProducer localhost:55555 default default` |
+| `AvroSerializeProducer` | Serializes a `User` Avro generic record and publishes it to a topic. Pair with `AvroDeserializeConsumer` or `AvroDeserializeConsumerSpecificRecord`. | `./build/staged/bin/AvroSerializeProducer localhost:55555 default default` |
 | `AvroSerializeProducerSpecificRecord` | Serializes a strongly-typed generated `User` class and publishes it to a topic. Pair with `AvroDeserializeConsumer` or `AvroDeserializeConsumerSpecificRecord`. | `./build/staged/bin/AvroSerializeProducerSpecificRecord localhost:55555 default default` |
 | `AvroDeserializeConsumer` | Subscribes to a topic and deserializes received messages into an Avro `GenericRecord`. | `./build/staged/bin/AvroDeserializeConsumer localhost:55555 default default` |
 | `AvroDeserializeConsumerSpecificRecord` | Subscribes to a topic and deserializes received messages into a strongly-typed generated `User` class. | `./build/staged/bin/AvroDeserializeConsumerSpecificRecord localhost:55555 default default` |
