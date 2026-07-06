@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CreateUser",
+  "description": "A user creation request",
+  "type": "object",
+  "javaType": "com.solace.samples.serdes.jsonschema.CreateUser",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "description": "Name of the user",
+      "type": "string"
+    },
+    "email": {
+      "description": "Email of the user",
+      "type": "string",
+      "format": "email"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ]
+}

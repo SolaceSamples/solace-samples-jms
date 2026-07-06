@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CreateUserResponse",
+  "description": "A user creation response",
+  "type": "object",
+  "javaType": "com.solace.samples.serdes.jsonschema.CreateUserResponse",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "Id of the created user",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}

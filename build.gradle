@@ -1,7 +1,10 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'application'
+    id 'idea'
+    id 'eclipse'
+    id 'org.jsonschema2pojo' version '1.2.1' // Newer version of jsonschema2pojo will require a newer version of gradle to work
+}
 
 // Don't need these task, so disabling them. Makes it possible to avoid
 // declaring a single application main class.
@@ -34,8 +37,8 @@ eclipse {
     }
     jdt {
         //if you want to alter the java versions (by default they are configured with gradle java plugin settings):
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 11
+        targetCompatibility = 11
     }
 }
 
@@ -50,14 +53,22 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    avroTools
+}
 
 dependencies {
     // Solace Messaging API for JMS Dependencies
-    implementation group: 'com.solacesystems', name:'sol-jms', version: '[10.25.0,)'
+    implementation group: 'com.solacesystems', name:'sol-jms', version: '[10.30.1,)'
     implementation group: 'javax.jms', name: 'javax.jms-api', version: '2.0.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.+'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.+'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.+'
+
+    // Only required when using SERDES
+    implementation platform(group: 'com.solace', name: 'solace-schema-registry-serdes-bom', version: '1.+')
+    implementation group: 'com.solace', name: 'solace-schema-registry-avro-serde'
+    implementation group: 'com.solace', name: 'solace-schema-registry-jsonschema-serde'
 
     //OpenTelemetry dependency
     implementation group: 'io.opentelemetry', name: 'opentelemetry-exporter-otlp', version: '1.47.+'
@@ -68,16 +79,67 @@ dependencies {
 
     // For any local libs that are not available from mavenCentral
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Avro tools for schema code generation
+    avroTools group: 'org.apache.avro', name: 'avro-tools', version: '1.12.0'
 }
 
 tasks.named('installDist') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+def avroDestDir = layout.buildDirectory.dir("generated-sources/avro").get().asFile
+def jsonDestDir = layout.buildDirectory.dir("generated-sources/jsonschema").get().asFile
+
+task generateAvro(type: JavaExec) {
+    description = 'Generates Java classes from Avro schema files'
+    group = 'build'
+
+    classpath = configurations.avroTools
+    mainClass = 'org.apache.avro.tool.Main'
+
+    def avroSrcDir = "${projectDir}/src/main/resources/avro-schema"
+    def userSchemaFile = file("${avroSrcDir}/user.avsc")
+
+    // Create output directory if it doesn't exist
+    doFirst {
+        file(avroDestDir).mkdirs()
+
+        // Make sure the file exists before trying to compile it
+        if (!userSchemaFile.exists()) {
+            throw new GradleException("Schema file ${userSchemaFile} does not exist!")
+        }
+    }
+
+    args = [
+            'compile',
+            'schema',
+            userSchemaFile.absolutePath,
+            avroDestDir
+    ]
+
+    inputs.file(userSchemaFile)
+    outputs.dir(avroDestDir)
+}
+
+// Configure the jsonschema2pojo extension to generate POJOs from the JSON schemas
+jsonSchema2Pojo {
+    source = files("${projectDir}/src/main/resources/json-schema")
+    targetDirectory = jsonDestDir
+    targetPackage = 'com.solace.samples.serdes.jsonschema'
+}
+
+compileJava {
+    dependsOn generateAvro
+    dependsOn generateJsonSchema2Pojo
+}
+
 sourceSets {
     main {
         java {
             srcDir 'src/main/java'
+            srcDir avroDestDir        // generated Avro classes
+            srcDir jsonDestDir        // generated JSON Schema classes
             exclude '**/DirectProcessor.java'
        }
    }
@@ -101,6 +163,19 @@ def scripts = [
     'dtQueuePublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueuePublisher',
     'dtQueueSubscriber':'com.solace.samples.features.distributedtracing.manualinstrumentation.QueueSubscriber',
     'dtTopicPublisher':'com.solace.samples.features.distributedtracing.manualinstrumentation.TopicPublisher',
+    'HelloWorldJmsJsonSchemaSerde':'com.solace.samples.features.serdes.jsonschema.HelloWorldJmsJsonSchemaSerde',
+    'HelloWorldJmsAvroSerde':'com.solace.samples.features.serdes.avro.HelloWorldJmsAvroSerde',
+    'AvroSerializeProducer':'com.solace.samples.features.serdes.avro.AvroSerializeProducer',
+    'AvroSerializeProducerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroSerializeProducerSpecificRecord',
+    'AvroDeserializeConsumer':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumer',
+    'AvroDeserializeConsumerSpecificRecord':'com.solace.samples.features.serdes.avro.AvroDeserializeConsumerSpecificRecord',
+    'AvroSerdesRequestor':'com.solace.samples.features.serdes.avro.AvroSerdesRequestor',
+    'AvroSerdesReplier':'com.solace.samples.features.serdes.avro.AvroSerdesReplier',
+    'JsonSchemaSerializeProducer':'com.solace.samples.features.serdes.jsonschema.JsonSchemaSerializeProducer',
+    'JsonSchemaDeserializeConsumerToJsonNode':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToJsonNode',
+    'JsonSchemaDeserializeConsumerToPojo':'com.solace.samples.features.serdes.jsonschema.JsonSchemaDeserializeConsumerToPojo',
+    'JsonSchemaSerdesRequestor':'com.solace.samples.features.serdes.jsonschema.JsonSchemaSerdesRequestor',
+    'JsonSchemaSerdesReplier':'com.solace.samples.features.serdes.jsonschema.JsonSchemaSerdesReplier',
 ]
 
 scripts.each() { scriptName, className ->
